@@ -40,12 +40,12 @@ tags: [claude-session]
 > [!NOTE]
 > Summary language is set by the prompt in `hooks/session-summary.sh` — edit it to write notes in whatever language you want.
 
-- **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
-- **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
-- **Two vault modes** — one machine-wide vault, or a per-project vault (e.g. a project wiki).
-- **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
+- 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
+- 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
+- 🗂️ **Two vault modes** — one machine-wide vault, or a per-project vault (e.g. a project wiki).
+- 🛡️ **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
 
-## Install
+## 🚀 Install
 
 ```
 /plugin marketplace add takashito/claude-obsidian-chronicle
@@ -75,7 +75,7 @@ git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-ob
 ```
 </details>
 
-## Triggers
+## 🪝 Triggers
 
 | Trigger | When |
 |---|---|
@@ -89,7 +89,7 @@ git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-ob
 > [!NOTE]
 > GUI front-ends (Claudian, etc.) work fine — transcripts still land in `~/.claude/projects/…` and `SessionEnd` gets the exact path. For `/done`, `done-runner.sh` finds the session via `CLAUDE_SESSION_ID` → Claudian metadata → newest transcript.
 
-## How it works
+## ⚙️ How it works
 
 ```mermaid
 flowchart LR
@@ -112,7 +112,7 @@ flowchart LR
 3. **Dedup** by `session_id` — fresh note, or an addendum if the session was resumed.
 4. **Summarize** with `claude -p`, write the note, append the Daily Note.
 
-## Configuration
+## 🔧 Configuration
 
 One JSON file — machine-wide or per-project.
 
@@ -134,7 +134,7 @@ Merged low→high: **defaults → user → project**. `vaultPath` resolves **pro
 
 See what resolves: `hooks/resolve-config.sh "$PWD"`. Config is re-read on every fire — no restart needed.
 
-## Troubleshooting
+## 🩺 Troubleshooting
 
 ```bash
 tail -f ~/.local/state/obsidian-chronicle/process.log
@@ -153,7 +153,7 @@ Every fire logs a `start:` line and a result:
 | `fail: claude -p exit=N` | check `claude` in PATH / the `model` value / network |
 | `fail: … Prompt is too long` | raise `maxBytes`, or set `model` to `sonnet` |
 
-## Reliability
+## 🛡️ Reliability
 
 Built to run for months without writing junk:
 
@@ -163,11 +163,11 @@ Built to run for months without writing junk:
 - **Skips, never guesses** — empty/oversized convo, `claude -p` errors, or no vault → log + exit, no garbage note.
 - **No `eval`** — config is read with `jq -r`; values never execute.
 
-## Comparison
+## 📊 Comparison
 
 How it stacks up against other session-logging / Obsidian plugins → **[COMPARISON.md](COMPARISON.md)**. Short version: it's the only one doing *automatic AI summaries → Obsidian Daily Notes, resume-aware*.
 
-## Uninstall
+## 🗑️ Uninstall
 
 ```
 /plugin uninstall obsidian-chronicle@obsidian-chronicle
@@ -177,7 +177,7 @@ rm -rf ~/.local/state/obsidian-chronicle   # optional: logs + config
 
 Your notes stay where they are.
 
-## Development
+## 🧪 Development
 
 ```
 .claude-plugin/{plugin,marketplace}.json   manifests
@@ -199,6 +199,6 @@ hooks/done-runner.sh                # simulate /done
 
 Bash 3.2 (macOS default) — no associative arrays. Summary prompts are inline in `session-summary.sh` (search `You are summarizing` / `You are extending`). No build step.
 
-## License
+## 📜 License
 
 MIT — see [LICENSE](LICENSE).
