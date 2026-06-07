@@ -5,7 +5,7 @@ allowed-tools: Read, Write, Bash, AskUserQuestion
 
 The user wants to configure the `obsidian-chronicle` plugin. Your job: generate an `obsidian-chronicle.json` file in either the **user-level state dir** (the machine-wide default) or the **current project** (applies only when Claude Code runs under that project tree).
 
-Config is JSON only — there is no `.env` anymore. The shared resolver `hooks/resolve-config.sh` reads these files; understand its model before writing:
+Config is JSON only. The shared resolver `hooks/resolve-config.sh` reads these files; understand its model before writing:
 
 - **Locations (project overrides user, key-by-key):**
   - user-level: `${XDG_STATE_HOME:-$HOME/.local/state}/obsidian-chronicle/obsidian-chronicle.json`
@@ -50,32 +50,20 @@ If the chosen file already exists:
 - Use AskUserQuestion: **Update** / **Cancel**.
 - On update, you will merge: keep keys the user doesn't change.
 
-## 5. Migrate from a legacy .env (only if present)
+## 5. Gather settings via AskUserQuestion (4 settings — one batched call)
 
-Older installs used `.env`. If `$PLUGIN/.env` or `$(pwd)/.env` exists, read ONLY its `OBSIDIAN_*` lines and map them to seed the defaults below. Never echo non-`OBSIDIAN_` lines (possible secrets).
-
-| legacy key | new key | note |
-|---|---|---|
-| `OBSIDIAN_SESSIONS_DIR` | `sessionsDir` | was absolute; you may keep it absolute or convert to a vault-relative form |
-| `OBSIDIAN_DAILY_DIR` | `dailyDir` | same |
-| `OBSIDIAN_CHRONICLE_MODEL` | `model` | |
-| `OBSIDIAN_CHRONICLE_LOG` | `log` | |
-
-## 6. Gather settings via AskUserQuestion (max 4 questions per call — use two batched calls for the 5 settings below)
-
-For each, default = existing value at the chosen file → legacy `.env` value → built-in default.
+For each, default = existing value at the chosen file → built-in default. Ask the `sessionsDir` default first so you can present `<sessionsDir>/Daily Notes` as the recommended `dailyDir`.
 
 1. **Vault path** (`vaultPath`) — Header: `Vault`. Options: the detected path from step 2 (recommended), `~/obsidian`. (Other = type a path.)
-2. **Sessions dir** (`sessionsDir`) — Header: `Sessions`. Relative to the vault. Options: `Sessions` (recommended), `02_Sessions`. Mention Daily Notes default to `<sessionsDir>/Daily Notes`.
-3. **Language** (`language`) — Header: `Language`. The language notes are written in (summary, title, section headings). Options: `English` (recommended / built-in default), `Japanese`. (Other = type a language name verbatim, e.g. `Français`.) Passed verbatim into the summarization prompt.
-4. **Model** (`model`) — Header: `Model`. Options: `sonnet` (recommended), `haiku`, `opus`.
-5. **Log path** (`log`) — Header: `Log`. Options: `~/.local/state/obsidian-chronicle/process.log` (recommended), `~/.claude/session-summary.log`.
+2. **Sessions dir** (`sessionsDir`) — Header: `Sessions`. Relative to the vault. Options: `Sessions` (recommended), `02_Sessions`. (Other = type a path.)
+3. **Daily Notes dir** (`dailyDir`) — Header: `Daily Notes`. Relative to the vault (where the per-day Daily Note lines are appended). Options: `<sessionsDir>/Daily Notes` (recommended — the built-in default, nested under the chosen Sessions dir), `Daily Notes` (at the vault root). (Other = type a path.)
+4. **Language** (`language`) — Header: `Language`. The language notes are written in (summary, title, section headings). Options: `English` (recommended / built-in default), `Japanese`. (Other = type a language name verbatim, e.g. `Français`.) Passed verbatim into the summarization prompt.
 
-`dailyDir` is not asked — it defaults to `<sessionsDir>/Daily Notes`. If the user wants a custom one, they can edit the JSON afterward (mention this).
+`model` and `log` are NOT asked — they fall back to built-in defaults (`sonnet`, and `~/.local/state/obsidian-chronicle/process.log`). To override either, edit the JSON afterward (mention this).
 
 If the user picks "Other", take their string verbatim. Do NOT expand `~` (the resolver handles tildes).
 
-## 7. Write the file
+## 6. Write the file
 
 Create the parent directory, then write JSON with `jq` so quoting/escaping is correct.
 
@@ -85,23 +73,22 @@ mkdir -p "$(dirname "$DEST")"
 jq -n \
   --arg vaultPath   "$VAULTPATH" \
   --arg sessionsDir "$SESSIONSDIR" \
+  --arg dailyDir    "$DAILYDIR" \
   --arg language    "$LANGUAGE" \
-  --arg model       "$MODEL" \
-  --arg log         "$LOG" \
-  '{vaultPath:$vaultPath, sessionsDir:$sessionsDir, language:$language, model:$model, log:$log}' \
+  '{vaultPath:$vaultPath, sessionsDir:$sessionsDir, dailyDir:$dailyDir, language:$language}' \
   > "$DEST"
 ```
 
-(Include `dailyDir` only if the user explicitly set a custom one.)
+(Include `model` or `log` only if the user explicitly asked to set a custom one.)
 
 **Updating an existing file** — merge so unspecified keys survive:
 ```bash
 TMP="$(mktemp)"
-jq --arg vaultPath "$VAULTPATH" --arg sessionsDir "$SESSIONSDIR" --arg language "$LANGUAGE" --arg model "$MODEL" --arg log "$LOG" \
-   '. * {vaultPath:$vaultPath, sessionsDir:$sessionsDir, language:$language, model:$model, log:$log}' "$DEST" > "$TMP" && mv "$TMP" "$DEST"
+jq --arg vaultPath "$VAULTPATH" --arg sessionsDir "$SESSIONSDIR" --arg dailyDir "$DAILYDIR" --arg language "$LANGUAGE" \
+   '. * {vaultPath:$vaultPath, sessionsDir:$sessionsDir, dailyDir:$dailyDir, language:$language}' "$DEST" > "$TMP" && mv "$TMP" "$DEST"
 ```
 
-## 8. Confirm
+## 7. Confirm
 
 ```bash
 echo "✓ wrote $DEST"
@@ -117,6 +104,5 @@ Show the user:
 # Rules
 
 - Be terse. No long explanations of what the plugin does.
-- Only write the chosen JSON file. Don't touch `.env`, `.env.example`, or any other file.
-- If migrating from `.env`, never read or echo non-`OBSIDIAN_` lines back to the user.
+- Only write the chosen JSON file. Don't touch any other file.
 - Use answers verbatim; don't expand `~`.
