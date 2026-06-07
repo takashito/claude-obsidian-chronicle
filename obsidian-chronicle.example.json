@@ -1,0 +1,27 @@
+{
+  "//": "obsidian-chronicle configuration. Copy to one of:",
+  "//user":    "  user-level (machine default): ${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json",
+  "//project": "  per-project: <repo>/.claude/obsidian-chronicle.json   (overrides user-level, key-by-key)",
+  "//generate": "Generate interactively with /obsidian-chronicle:setup.",
+
+  "//vaultPath": "Vault root. Absolute or ~. If omitted everywhere, the plugin tries `obsidian vault` (CLI); if that fails too, it writes nothing.",
+  "vaultPath": "~/obsidian",
+
+  "//sessionsDir": "Session-note dir. Relative -> joined to vaultPath. Leading / or ~ = absolute.",
+  "sessionsDir": "Sessions",
+
+  "//dailyDir": "Daily-note dir. Optional; defaults to <sessionsDir>/Daily Notes.",
+  "dailyDir": "Sessions/Daily Notes",
+
+  "//model": "Model for `claude -p` summaries: haiku (recommended) | sonnet | opus.",
+  "model": "haiku",
+
+  "//log": "Append-only hook activity log (lives outside the vault).",
+  "log": "~/.local/state/obsidian-chronicle/process.log",
+
+  "//minBytes": "Skip if extracted conversation is smaller than this.",
+  "minBytes": 200,
+
+  "//maxBytes": "Skip if extracted conversation is larger (protects `claude -p`).",
+  "maxBytes": 1000000
+}

@@ -29,87 +29,41 @@ INPUT=$(cat)
   # a runaway summarizer, those still work.
   trap '' HUP
 
-  # ---------- Config loading ----------
-  # Precedence (low → high):
-  #   1. Built-in defaults
-  #   2. Plugin <plugin-root>/.env
-  #   3. Project $CWD/.env (session's working dir, from hook payload)
-  #   4. Shell environment variables
-  # REASON_OVERRIDE (control var) is always taken from the caller's env.
-
-  _CALLER_REASON="$REASON_OVERRIDE"
-
-  for _var in OBSIDIAN_SESSIONS_DIR OBSIDIAN_DAILY_DIR OBSIDIAN_CHRONICLE_MODEL OBSIDIAN_CHRONICLE_LOG; do
-    if [ -n "${!_var+x}" ]; then
-      printf -v "_SHELL_$_var"      '%s' "${!_var}"
-      printf -v "_SHELL_SET_$_var"  '%s' "1"
-    fi
-  done
-
-  load_obsidian_env() {
-    local file="$1" line key val
-    [ -f "$file" ] || return 0
-    while IFS= read -r line || [ -n "$line" ]; do
-      # Windows / mixed-eol safety: strip CR
-      line="${line%$'\r'}"
-      case "$line" in ''|\#*) continue ;; esac
-      case "$line" in OBSIDIAN_*=*) : ;; *) continue ;; esac
-      key="${line%%=*}"
-      val="${line#*=}"
-      # Strip trailing whitespace (a path with a stray trailing space silently
-      # creates a misnamed dir on most filesystems)
-      val="${val%"${val##*[![:space:]]}"}"
-      case "$val" in
-        \"*\") val="${val#\"}"; val="${val%\"}" ;;
-        \'*\') val="${val#\'}"; val="${val%\'}" ;;
-      esac
-      printf -v "$key" '%s' "$val"
-    done < "$file"
-  }
-
-  PLUGIN_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-  load_obsidian_env "$PLUGIN_ROOT/.env"
-
+  # ---------- Hook payload ----------
   TRANSCRIPT_PATH=$(printf '%s' "$INPUT" | jq -r '.transcript_path // empty')
   SESSION_ID=$(printf '%s'    "$INPUT" | jq -r '.session_id     // empty')
   CWD=$(printf '%s'           "$INPUT" | jq -r '.cwd            // empty')
   REASON=$(printf '%s'        "$INPUT" | jq -r '.reason         // "unknown"')
+  # REASON_OVERRIDE (control var) always comes from the caller's env.
+  [ -n "${REASON_OVERRIDE:-}" ] && REASON="$REASON_OVERRIDE"
 
-  [ -n "$CWD" ] && load_obsidian_env "$CWD/.env"
+  # ---------- Config resolution ----------
+  # All settings come from JSON via the shared resolver (resolve-config.sh):
+  #   built-in defaults <- user JSON <- project JSON, with vaultPath resolved
+  #   from files -> `obsidian vault` CLI -> none. Paths come back absolute and
+  #   tilde-expanded. Fields are read with `jq -r` (no eval).
+  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+  CONFIG="$("$SCRIPT_DIR/resolve-config.sh" "$CWD")"
 
-  for _var in OBSIDIAN_SESSIONS_DIR OBSIDIAN_DAILY_DIR OBSIDIAN_CHRONICLE_MODEL OBSIDIAN_CHRONICLE_LOG; do
-    _set="_SHELL_SET_$_var"
-    if [ "${!_set:-0}" = 1 ]; then
-      _orig="_SHELL_$_var"
-      printf -v "$_var" '%s' "${!_orig}"
-    fi
-  done
+  CONFIG_SOURCE=$(printf '%s'   "$CONFIG" | jq -r '.source')
+  VAULT=$(printf '%s'           "$CONFIG" | jq -r '.sessionsDir')
+  DAILY_DIR=$(printf '%s'       "$CONFIG" | jq -r '.dailyDir')
+  LOG=$(printf '%s'             "$CONFIG" | jq -r '.log')
+  SUMMARY_MODEL=$(printf '%s'   "$CONFIG" | jq -r '.model')
+  CONVO_MIN_BYTES=$(printf '%s' "$CONFIG" | jq -r '.minBytes')
+  CONVO_MAX_BYTES=$(printf '%s' "$CONFIG" | jq -r '.maxBytes')
 
-  REASON_OVERRIDE="$_CALLER_REASON"
-  [ -n "$REASON_OVERRIDE" ] && REASON="$REASON_OVERRIDE"
-  # ---------- end config loading ----------
-
-  expand_tilde() {
-    case "$1" in
-      \~)    echo "$HOME" ;;
-      \~/*)  echo "$HOME/${1#\~/}" ;;
-      *)     echo "$1" ;;
-    esac
-  }
-
-  VAULT="$(expand_tilde "${OBSIDIAN_SESSIONS_DIR:-$HOME/obsidian/02_Sessions}")"
-  DAILY_DIR="$(expand_tilde "${OBSIDIAN_DAILY_DIR:-$VAULT/Daily Notes}")"
-  LOG="$(expand_tilde "${OBSIDIAN_CHRONICLE_LOG:-$HOME/.claude/session-summary.log}")"
-  SUMMARY_MODEL="${OBSIDIAN_CHRONICLE_MODEL:-haiku}"
-  # Max bytes of extracted conversation we'll send to `claude -p`.
-  # Haiku's context is large, but the prompt + frontmatter scaffolding also
-  # needs room. 200 KB of UTF-8 conversation is comfortably within budget.
-  CONVO_MAX_BYTES="${OBSIDIAN_CHRONICLE_MAX_BYTES:-200000}"
-  # Min bytes of extracted conversation that's worth summarizing.
-  # Below this we skip — the session had no real content.
-  CONVO_MIN_BYTES="${OBSIDIAN_CHRONICLE_MIN_BYTES:-200}"
+  # The log lives outside the vault (default: under the XDG state dir); make sure
+  # its parent exists before the first write below.
+  mkdir -p "$(dirname "$LOG")" 2>/dev/null
 
   ts() { date '+%Y-%m-%d %H:%M:%S'; }
+
+  # No resolvable vault → never guess a location; log and bail (fail-safe).
+  if [ "$CONFIG_SOURCE" = "none" ] || [ -z "$VAULT" ]; then
+    echo "$(ts) skip: no vault configured (source=none, $SESSION_ID, reason=$REASON). Run /obsidian-chronicle:setup" >> "$LOG"
+    exit 0
+  fi
 
   [ -z "$TRANSCRIPT_PATH" ] || [ ! -f "$TRANSCRIPT_PATH" ] && {
     echo "$(ts) skip: no transcript ($SESSION_ID, reason=$REASON)" >> "$LOG"
@@ -120,8 +74,11 @@ INPUT=$(cat)
   # even when PreCompact + /done + SessionEnd race within milliseconds.
   # Stale-lock sweep (>5 min) handles the rare case of a previous run that
   # was SIGKILL'd before trap could clean up.
-  LOCK="$HOME/.claude/session-summary.${SESSION_ID}.lock"
-  find "$HOME/.claude" -maxdepth 1 -type d -name "session-summary.${SESSION_ID}.lock" -mmin +5 -exec rmdir {} \; 2>/dev/null
+  # Lock lives next to the log (XDG state dir), already created above — no
+  # dependency on ~/.claude existing.
+  RUNTIME_DIR="$(dirname "$LOG")"
+  LOCK="$RUNTIME_DIR/session-summary.${SESSION_ID}.lock"
+  find "$RUNTIME_DIR" -maxdepth 1 -type d -name "session-summary.${SESSION_ID}.lock" -mmin +5 -exec rmdir {} \; 2>/dev/null
   if ! mkdir "$LOCK" 2>/dev/null; then
     echo "$(ts) skip: in-progress lock held ($SESSION_ID, reason=$REASON)" >> "$LOG"
     exit 0

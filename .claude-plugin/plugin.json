@@ -1,10 +1,25 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "obsidian-chronicle",
+  "displayName": "Obsidian Chronicle",
   "version": "0.1.0",
-  "description": "Integrated Obsidian vault + Claude Code chronicle plugin with two pillars. (1) The obsidian-vault agent — the single, unified handler for ALL Obsidian vault work: adding, updating, deleting, organizing, searching, and analyzing notes, tasks, properties, canvases, and bases with correct wikilink/frontmatter/daily-note semantics (the main session delegates vault work to it instead of using generic file tools). (2) Automatic session recording — auto-generates Obsidian-format session summaries and Daily Note entries from Claude Code sessions (task accomplishments, research findings, decisions), with mid-session checkpoints via /done and the SessionEnd/PreCompact hooks. Configure with /obsidian-chronicle:setup.",
+  "description": "Auto-records Claude Code sessions as structured Obsidian notes + Daily Note entries (via the SessionEnd/PreCompact hooks and /done), and ships the obsidian-vault agent — the unified handler for all Obsidian vault work (create, edit, search, organize notes, tasks, canvases, bases). Configure with /obsidian-chronicle:setup.",
   "author": {
-    "name": "taito"
+    "name": "takashito",
+    "url": "https://github.com/takashito"
   },
+  "homepage": "https://github.com/takashito/claude-obsidian-chronicle",
+  "repository": "https://github.com/takashito/claude-obsidian-chronicle",
+  "license": "MIT",
+  "keywords": [
+    "obsidian",
+    "session-summary",
+    "daily-notes",
+    "journaling",
+    "knowledge-management",
+    "hooks",
+    "claude-code"
+  ],
   "hooks": {
     "SessionEnd": [
       {

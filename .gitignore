@@ -3,3 +3,5 @@
 *.lock
 .env
 .claude/settings.local.json
+# Project-local plugin config (per-machine paths; don't commit)
+.claude/obsidian-chronicle.json

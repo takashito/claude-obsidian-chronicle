@@ -21,7 +21,7 @@ Research date: 2026-05-29. Where this plugin fits relative to other Claude Code 
 3. **Resume-aware dedup by `session_id`.** Resumed sessions get an `## Resumed YYYY-MM-DD HH:MM` addendum block on the existing note, not a duplicate.
 4. **`/done` as a hidden checkpoint.** UserPromptSubmit interceptor fires the summary in background and blocks the prompt from reaching the model — no visible turn, no context pollution.
 5. **Semantic classification in frontmatter.** `classification: task | research | other` enables Obsidian queries / Bases views.
-6. **Safe `.env` parsing.** Plugin → project → shell precedence; reads only `OBSIDIAN_*` keys; uses `printf -v` so command substitutions in values are not executed.
+6. **Safe JSON config.** User-level → project precedence (merged key-by-key); parsed with `jq` and read with `jq -r`, never `eval`/`source`, so values can't execute. `vaultPath` resolves from config → `obsidian vault` CLI → else skip (never guesses a path).
 
 ## What's missing or worth improving
 

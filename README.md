@@ -17,7 +17,7 @@
 You end a Claude Code session — `/clear`, `/new`, `/obsidian-chronicle:done`, quit, or auto-compact. Seconds later, a structured Markdown note appears in your Obsidian vault, and today's Daily Note grows by one line. No clicks. No manual journaling.
 
 ```markdown
-─── <Vault>/02_Sessions/Wire SessionEnd hook to Obsidian.md ───
+─── <Vault>/Sessions/Wire SessionEnd hook to Obsidian.md ───
 
 ---
 title: Wire SessionEnd hook to Obsidian
@@ -50,7 +50,7 @@ Hook fires reliably; verified with synthetic payload and live sessions.
 ```
 
 ```markdown
-─── <Vault>/02_Sessions/Daily Notes/2026-05-29.md (appended) ───
+─── <Vault>/Sessions/Daily Notes/2026-05-29.md (appended) ───
 
 ## ✅ Wire SessionEnd hook to Obsidian — [[Wire SessionEnd hook to Obsidian]]
 
@@ -76,15 +76,25 @@ Research sessions get `🔍 + **Keywords:** + #research` for searchability. Resu
 
 ## 🚀 Quickstart
 
-**Requirements:** Claude Code ≥ 2.1, `jq`, `bash` 3.2+, an Obsidian vault. macOS / Linux.
+**Requirements:** Claude Code ≥ 2.1, `jq`, `bash` 3.2+, an Obsidian vault. macOS / Linux. The [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) is optional — used to auto-detect the vault path during setup and as a runtime fallback.
 
-### 1. Get the plugin
+### 1. Add the marketplace and install
 
-```bash
-git clone https://github.com/<you>/claude-obsidian-chronicle ~/dev/claude-obsidian-chronicle
+In Claude Code:
+
+```
+/plugin marketplace add takashito/claude-obsidian-chronicle
+/plugin install obsidian-chronicle@obsidian-chronicle
 ```
 
-### 2. Register it in `~/.claude/settings.json`
+<details>
+<summary>Alternative: local / development install</summary>
+
+Clone, then register the local directory as a marketplace in `~/.claude/settings.json`:
+
+```bash
+git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-obsidian-chronicle
+```
 
 ```jsonc
 {
@@ -103,16 +113,17 @@ git clone https://github.com/<you>/claude-obsidian-chronicle ~/dev/claude-obsidi
 }
 ```
 
-### 3. Restart Claude Code and configure
+</details>
+
+### 2. Configure
 
 ```
-claude
 > /obsidian-chronicle:setup
 ```
 
-The setup command asks where your vault is and writes a `.env` file. **That's it.**
+The setup command detects your vault (via the `obsidian` CLI) and writes an `obsidian-chronicle.json` file. **That's it.**
 
-Every session you end (`/clear`, `/new`, `/obsidian-chronicle:done`, quit) now auto-writes a summary into `<vault>/02_Sessions/` and appends a line to today's Daily Note.
+Every session you end (`/clear`, `/new`, `/obsidian-chronicle:done`, quit) now auto-writes a summary into `<vault>/Sessions/` and appends a line to today's Daily Note.
 
 ---
 
@@ -175,9 +186,10 @@ Three hooks → one script → one note + one Daily Note line.
                                       │
                 ┌─────────────────────┼─────────────────────┐
                 ▼                     ▼                     ▼
-        load 3-tier .env      extract conversation     dedup by session_id
-        (plugin→project       jq strips JSONL          search frontmatter
-         →shell env)          ~14% of raw size         in vault
+        resolve JSON config   extract conversation     dedup by session_id
+        (defaults→user        jq strips JSONL          search frontmatter
+         →project; vault       ~14% of raw size         in vault
+         from files/CLI)
                                       │
                                       ▼
                                   claude -p
@@ -227,12 +239,17 @@ The wall between "this plugin sometimes silently breaks" and "this plugin is som
 | **Per-session lock** (`~/.claude/session-summary.<id>.lock`, 5-min stale) | PreCompact + manual `/done` + SessionEnd racing for the same `session_id`. |
 | **Conversation size gate** (200 B – 200 KB after extraction) | Empty "open window then close" sessions → no note. Pathologically huge transcripts → skip rather than write garbage. |
 | **Output validation** (exit code, frontmatter delimiter, H1 presence, known error strings) | `claude -p` returns `"Prompt is too long"` or `"Error: ..."` → we detect and skip. **No more `Untitled session.md`.** |
-| **`printf -v` for `.env` values** | Project `.env` containing `OBSIDIAN_SESSIONS_DIR="$(rm -rf /)"` is treated as a literal string. |
-| **Only `OBSIDIAN_*` keys parsed** | A shared repo `.env` with `DB_PASSWORD` is safely ignored — never exported, never logged. |
+| **JSON config parsed with `jq`, never `eval`/`source`** | A config value like `"$(rm -rf /)"` is just a string — `jq -r` reads it, nothing executes it. |
+| **No vault → skip, never guess** | If no `vaultPath` resolves (no JSON, no `obsidian` CLI), the hook logs `skip: no vault configured` and exits — it never falls back to writing into a guessed `~/obsidian`. |
 
 ---
 
 ## 🔧 Configuration
+
+Configuration is a single JSON file. It supports two use cases:
+
+- **One vault per machine** — a user-level config used everywhere.
+- **A vault per project** — e.g. a project wiki under the repo, used only when Claude runs in that project tree.
 
 ### Interactive
 
@@ -240,43 +257,61 @@ The wall between "this plugin sometimes silently breaks" and "this plugin is som
 /obsidian-chronicle:setup
 ```
 
-Asks where to save the `.env` (plugin-wide or this project only) and walks through the settings.
+Detects your vault via `obsidian vault`, asks whether to save **user-level** or **per-project**, and writes the JSON.
 
-### Manual
+### File locations
 
-```bash
-cp ~/dev/claude-obsidian-chronicle/.env.example ~/dev/claude-obsidian-chronicle/.env
-$EDITOR ~/dev/claude-obsidian-chronicle/.env
+| Scope | Path |
+|---|---|
+| user-level (machine default) | `${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json` |
+| per-project | `<repo>/.claude/obsidian-chronicle.json` (found by walking up from cwd) |
+
+### Resolution
+
+```
+                  lowest                                   highest
+   built-in defaults  →  user-level JSON  →  project JSON        (merged key-by-key)
+
+   vaultPath only:   project JSON → user JSON → `obsidian vault` (CLI) → skip
 ```
 
-### Precedence
-
-```
-                       lowest                                          highest
-   built-in defaults  →  <plugin-root>/.env  →  $CWD/.env  →  shell env vars
-```
-
-Tilde (`~/foo`) and `$HOME/foo` both work.
+`vaultPath` has **no silent default** — if none resolves, the hook skips rather than writing to a guessed location. Tilde (`~/foo`) works in any path.
 
 ### Keys
 
-| Variable | Default | Purpose |
+| Key | Default | Purpose |
 |---|---|---|
-| `OBSIDIAN_SESSIONS_DIR` | `~/obsidian/02_Sessions` | Where session notes go |
-| `OBSIDIAN_DAILY_DIR` | `<sessions-dir>/Daily Notes` | Where Daily Notes live |
-| `OBSIDIAN_CHRONICLE_MODEL` | `haiku` | Model passed to `claude -p` (`haiku` · `sonnet` · `opus`) |
-| `OBSIDIAN_CHRONICLE_LOG` | `~/.claude/session-summary.log` | Append-only hook activity log |
-| `OBSIDIAN_CHRONICLE_MIN_BYTES` | `200` | Skip if extracted conversation is smaller |
-| `OBSIDIAN_CHRONICLE_MAX_BYTES` | `200000` | Skip if extracted conversation is larger |
+| `vaultPath` | _(from files → `obsidian vault` CLI → else skip)_ | Vault root. Absolute or `~`. |
+| `sessionsDir` | `Sessions` | Session-note dir. Relative → joined to `vaultPath`; leading `/` or `~` = absolute. |
+| `dailyDir` | `<sessionsDir>/Daily Notes` | Daily-note dir. |
+| `model` | `haiku` | Model passed to `claude -p` (`haiku` · `sonnet` · `opus`). |
+| `log` | `~/.local/state/obsidian-chronicle/process.log` | Append-only hook activity log (outside the vault). |
+| `minBytes` | `200` | Skip if extracted conversation is smaller. |
+| `maxBytes` | `1000000` | Skip if extracted conversation is larger. |
+
+### Manual
+
+Copy the template to one of the locations above and edit:
+
+```bash
+cp ~/dev/claude-obsidian-chronicle/obsidian-chronicle.example.json \
+   "${XDG_STATE_HOME:-$HOME/.local/state}/obsidian-chronicle/obsidian-chronicle.json"
+```
+
+Verify what resolves with the shared resolver:
+
+```bash
+~/dev/claude-obsidian-chronicle/hooks/resolve-config.sh "$PWD"
+```
 
 ---
 
 ## 🩺 Troubleshooting
 
-The single source of truth is the hook log:
+The single source of truth is the hook log (default path; override with `log`):
 
 ```bash
-tail -f ~/.claude/session-summary.log
+tail -f ~/.local/state/obsidian-chronicle/process.log
 ```
 
 | Log line | Meaning | Action |
@@ -284,14 +319,15 @@ tail -f ~/.claude/session-summary.log
 | `wrote <path> [class=task, new]` | ✓ Healthy. New summary written. | — |
 | `appended <path> [class=task, resumed]` | ✓ Healthy. Addendum added to existing note. | — |
 | `skip: empty/trivial conversation (<200B)` | Session had no real content. | Expected after opening a window and closing without working. |
-| `skip: in-progress lock held` | Another hook for this session is already summarizing. | Wait or `rm ~/.claude/session-summary.<id>.lock`. |
+| `skip: no vault configured (source=none ...)` | No `vaultPath` resolved. | Run `/obsidian-chronicle:setup`, or add `vaultPath` to your JSON. |
+| `skip: in-progress lock held` | Another hook for this session is already summarizing. | Wait or `rm <log-dir>/session-summary.<id>.lock`. |
 | `skip: headless cwd` / `skip: headless session marker` | The recursion / headless guards caught an internal `claude -p` session. | Expected. Means safeguards are working. |
 | `skip: no transcript` | Hook input had no `transcript_path`. | Should not happen with normal Claude Code; check the hook payload. |
-| `fail: claude -p exit=N (summary, ...)` | `claude -p` returned non-zero. | Check `claude` binary in PATH, model name in `.env`, network. |
+| `fail: claude -p exit=N (summary, ...)` | `claude -p` returned non-zero. | Check `claude` binary in PATH, the `model` value, network. |
 | `fail: summary missing frontmatter (head: ...)` | `claude -p` returned something that isn't a summary. | Often a transient model glitch. Will work next time. |
-| `fail: summary rejected — looks like a claude -p error: Prompt is too long...` | Extraction didn't shrink it enough, or model errored. | Raise `OBSIDIAN_CHRONICLE_MAX_BYTES`, or try `OBSIDIAN_CHRONICLE_MODEL=sonnet`. |
+| `fail: summary rejected — looks like a claude -p error: Prompt is too long...` | Extraction didn't shrink it enough, or model errored. | Raise `maxBytes`, or set `model` to `sonnet`. |
 
-The plugin auto-loads `.env` on every hook fire, so config changes take effect immediately — no Claude restart needed.
+The plugin re-resolves the JSON config on every hook fire, so config changes take effect immediately — no Claude restart needed.
 
 ---
 
@@ -304,8 +340,8 @@ The plugin auto-loads `.env` on every hook fire, so config changes take effect i
 # 2. Remove the plugin directory
 rm -rf ~/dev/claude-obsidian-chronicle
 
-# 3. Optional: clear runtime files
-rm -f ~/.claude/session-summary.log ~/.claude/session-summary.*.lock
+# 3. Optional: clear runtime files + config
+rm -rf ~/.local/state/obsidian-chronicle
 ```
 
 Your existing summary notes stay where they are.
@@ -325,10 +361,13 @@ claude-obsidian-chronicle/
 │   ├── setup.md             # /obsidian-chronicle:setup
 │   └── done.md              # /obsidian-chronicle:done
 ├── hooks/
-│   ├── session-summary.sh   # ~350 lines — the one writer
-│   └── done-runner.sh       # ~40 lines — backs /done
-├── .env.example
-├── .gitignore               # .env, *.log, *.lock
+│   ├── session-summary.sh   # the one writer
+│   ├── resolve-config.sh    # shared config resolver (JSON → resolved paths)
+│   └── done-runner.sh       # backs /done
+├── tests/
+│   └── test-resolve-config.sh   # resolver unit tests
+├── obsidian-chronicle.example.json
+├── .gitignore
 ├── COMPARISON.md            # field survey + roadmap
 └── README.md
 ```
@@ -346,7 +385,13 @@ echo '{"session_id":"test","transcript_path":"/path/to/real.jsonl","cwd":"/tmp",
 ~/dev/claude-obsidian-chronicle/hooks/done-runner.sh
 ```
 
-Both detach and return instantly. Watch progress with `tail -f ~/.claude/session-summary.log`.
+Both detach and return instantly. Watch progress with `tail -f ~/.local/state/obsidian-chronicle/process.log`.
+
+### Run the resolver tests
+
+```bash
+bash tests/test-resolve-config.sh
+```
 
 ### Tune the summarization prompt
 

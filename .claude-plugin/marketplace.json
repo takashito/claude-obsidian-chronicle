@@ -1,13 +1,35 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "obsidian-chronicle",
   "owner": {
-    "name": "taito"
+    "name": "takashito"
+  },
+  "metadata": {
+    "description": "Single-plugin marketplace for obsidian-chronicle.",
+    "version": "0.1.0"
   },
   "plugins": [
     {
       "name": "obsidian-chronicle",
       "source": "./",
-      "description": "Integrated Obsidian plugin: the obsidian-vault agent is the unified handler for all vault work (add/change/delete/organize/search notes, tasks, canvases, bases), plus automatic recording of Claude Code session summaries + Daily Notes via /done and SessionEnd/PreCompact."
+      "displayName": "Obsidian Chronicle",
+      "description": "Auto-records Claude Code sessions as structured Obsidian notes + Daily Note entries (via the SessionEnd/PreCompact hooks and /done), and ships the obsidian-vault agent — the unified handler for all Obsidian vault work (create, edit, search, organize notes, tasks, canvases, bases). Configure with /obsidian-chronicle:setup.",
+      "author": {
+        "name": "takashito"
+      },
+      "homepage": "https://github.com/takashito/claude-obsidian-chronicle",
+      "repository": "https://github.com/takashito/claude-obsidian-chronicle",
+      "license": "MIT",
+      "category": "productivity",
+      "keywords": [
+        "obsidian",
+        "session-summary",
+        "daily-notes",
+        "journaling",
+        "knowledge-management",
+        "hooks",
+        "claude-code"
+      ]
     }
   ]
 }
