@@ -1,44 +1,44 @@
 # How obsidian-chronicle compares
 
-A few Claude Code plugins overlap with session logging and journaling — but
-they mostly solve *different* problems. Here's the map.
+A few Claude Code tools overlap with session logging and journaling — but
+they each cover only *part* of "finished session → notes." Here's the map.
 
 ## At a glance
 
-<sub>✅ built-in · 🟡 manual · — not what it's for</sub>
+<sub>✅ yes · 🟡 partial · — no / not its focus</sub>
 
-| Capability | **chronicle** | session-logger | timelog | dev-journal |
-|---|:--:|:--:|:--:|:--:|
-| Runs automatically (hooks) | ✅ | ✅ | ✅ | — |
-| AI-written prose summary | ✅ | — | — | 🟡 |
-| Writes into Obsidian Daily Notes | ✅ | — | — | — |
-| Resume-aware (no duplicate notes) | ✅ | — | — | — |
-| Semantic frontmatter (task/research) | ✅ | — | — | — |
-| Per-tool audit trail | — | ✅ | — | — |
-| Time / billing metrics | — | — | ✅ | — |
+| Capability | **chronicle** | daily-patterns-pack | remember.md | dev-journal | session-logger |
+|---|:--:|:--:|:--:|:--:|:--:|
+| Installable Claude Code plugin (marketplace) | ✅ | — | ✅ | ✅ | ✅ |
+| Automatic — nothing to run | ✅ | — | 🟡 | — | ✅ |
+| AI-written session summary | ✅ | ✅ | ✅ | 🟡 | — |
+| Into Obsidian Daily Notes | ✅ | ✅ | 🟡 | — | — |
+| Resume-aware (folds into the same note) | ✅ | — | 🟡 | — | — |
 
-## The plugins
+Only chronicle is ✅ across the board: a marketplace plugin that writes AI summaries into your Obsidian Daily Notes **automatically** and **dedups resumed sessions**.
 
-| Plugin | In one line |
-|---|---|
-| **obsidian-chronicle** (this) | Auto AI summaries → Obsidian notes + Daily Notes, resume-aware |
-| [claude-session-logger](https://github.com/DazzleML/claude-session-logger) | Real-time per-tool audit log to `~/.claude/sesslogs/` |
-| [claude-code-timelog](https://github.com/RemoteCTO/claude-code-timelog) | Time tracking for billing / invoicing |
-| [dev-journal](https://github.com/juliuszfedyk/dev-journal) | Manual `/journal` decision entries committed to your repo |
+## The tools
+
+| Tool | What it is | In one line |
+|---|---|---|
+| **obsidian-chronicle** (this) | Claude Code plugin | Auto AI summaries → Obsidian notes + Daily Notes, resume-aware |
+| [daily-patterns-pack](https://github.com/aplaceforallmystuff/daily-patterns-pack) | skills + agent, copied into `~/.claude` | `/log-to-daily` appends an AI session log to today's daily note (manual) |
+| [remember.md](https://github.com/remember-md/remember) | Claude Code plugin | Captures session knowledge into an Obsidian-compatible Markdown vault (incl. `Journal/` daily notes); nudge/manual |
+| [dev-journal](https://github.com/juliuszfedyk/dev-journal) | Claude Code plugin | Manual `/journal` decision entries in `docs/journal/` (not Obsidian) |
+| [claude-session-logger](https://github.com/DazzleML/claude-session-logger) | Claude Code plugin | Real-time per-tool audit log to `~/.claude/sesslogs/` (no AI summary) |
 
 ## TL;DR
 
 > [!IMPORTANT]
-> chronicle is the only one that turns finished sessions into **AI-written Obsidian notes wired into your Daily Notes** — and the only one that folds a resumed session back into its original note instead of duplicating it.
+> chronicle's niche is being **fully automatic and resume-aware**: a Claude Code hook writes the summary into your Obsidian Daily Notes with nothing to remember, and a resumed session folds back into its original note instead of creating a duplicate.
 
-It's not a logger or a time tracker, and doesn't try to be. A power user runs
-three side by side: **chronicle** for journaling, **timelog** for invoicing,
-**session-logger** for incident replay.
+Writing AI summaries into Obsidian isn't unique — [daily-patterns-pack](https://github.com/aplaceforallmystuff/daily-patterns-pack) and [remember.md](https://github.com/remember-md/remember) do it too — but they need a manual command or a nudge, daily-patterns-pack isn't a marketplace plugin, and none fold a resumed session back into its note. chronicle also isn't a raw logger: run it alongside **session-logger** (incident replay) or a time tracker (invoicing) if you want those too.
 
 ---
 
-<sub>Research: 2026-05-29. Sources:
-[session-logger](https://github.com/DazzleML/claude-session-logger) ·
-[timelog](https://github.com/RemoteCTO/claude-code-timelog) ·
+<sub>Researched 2026-06-07. Sources:
+[daily-patterns-pack](https://github.com/aplaceforallmystuff/daily-patterns-pack) ·
+[remember.md](https://github.com/remember-md/remember) ·
 [dev-journal](https://github.com/juliuszfedyk/dev-journal) ·
+[session-logger](https://github.com/DazzleML/claude-session-logger) ·
 [Hooks reference](https://code.claude.com/docs/en/hooks)</sub>
