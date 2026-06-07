@@ -9,6 +9,12 @@
 [![CI](https://github.com/takashito/claude-obsidian-chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/takashito/claude-obsidian-chronicle/actions/workflows/ci.yml)
 ![license](https://img.shields.io/badge/license-MIT-blue)
 
+<br>
+
+<img src="assets/demo-en.gif" alt="obsidian-chronicle demo — end a Claude Code session and a structured Obsidian note plus a Daily Note line appear automatically; resume the session and it appends to the same note with no duplicate" width="840">
+
+<sub>🇯🇵 Japanese demo: <a href="assets/demo-ja.gif">demo-ja.gif</a> · 🎞️ higher-quality MP4: <a href="assets/demo-en.mp4">demo-en.mp4</a></sub>
+
 </div>
 
 ---
