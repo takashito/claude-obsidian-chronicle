@@ -325,6 +325,7 @@ tail -f ~/.local/state/obsidian-chronicle/process.log
 
 | Log line | Meaning | Action |
 |---|---|---|
+| `start: session=<id> reason=<r> source=<src>` | A hook fire began processing. Pairs with the result line below. | — |
 | `wrote <path> [class=task, new]` | ✓ Healthy. New summary written. | — |
 | `appended <path> [class=task, resumed]` | ✓ Healthy. Addendum added to existing note. | — |
 | `skip: empty/trivial conversation (<200B)` | Session had no real content. | Expected after opening a window and closing without working. |

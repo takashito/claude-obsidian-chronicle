@@ -59,6 +59,11 @@ INPUT=$(cat)
 
   ts() { date '+%Y-%m-%d %H:%M:%S'; }
 
+  # Record the start of every processed hook fire (the recursion-guarded inner
+  # `claude -p` sessions exit before this point, so they are not logged). Pairs
+  # with the wrote/appended/skip/fail line that follows.
+  echo "$(ts) start: session=$SESSION_ID reason=$REASON source=$CONFIG_SOURCE" >> "$LOG"
+
   # No resolvable vault → never guess a location; log and bail (fail-safe).
   if [ "$CONFIG_SOURCE" = "none" ] || [ -z "$VAULT" ]; then
     echo "$(ts) skip: no vault configured (source=none, $SESSION_ID, reason=$REASON). Run /obsidian-chronicle:setup" >> "$LOG"
