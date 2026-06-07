@@ -55,7 +55,20 @@ tags: [claude-session]
 
 `setup` auto-detects your vault (via the `obsidian` CLI if you have it), asks machine-wide vs per-project, and writes the config. That's it.
 
-**Requirements:** Claude Code ≥ 2.1, `jq`, bash 3.2+, an Obsidian vault. macOS/Linux. The [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) is optional (vault auto-detect).
+**Requirements:** Claude Code ≥ 2.1, `jq`, bash 3.2+, an Obsidian vault. **macOS / Linux are supported; Windows is experimental — see below.** The [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) is optional (vault auto-detect).
+
+<details><summary>🪟 Windows (experimental, best-effort)</summary>
+
+The hooks are bash scripts. Claude Code runs hook commands through **Git Bash** on Windows, so they *can* run there — but this is **not a fully tested platform**. To try it:
+
+- **Install [Git for Windows](https://git-scm.com/download/win)** — it provides `bash` plus the `sed`/`awk`/`grep`/`find` coreutils the scripts need. If `bash.exe` isn't on `PATH`, point Claude Code at it: `setx CLAUDE_CODE_GIT_BASH_PATH "C:\Program Files\Git\bin\bash.exe"`. (Or use **WSL**, which behaves like Linux.)
+- **Install `jq`** and make sure it's on `PATH` (Git Bash does not bundle it).
+- **Line endings matter.** The repo ships a `.gitattributes` that forces `*.sh` to LF, so a normal checkout is fine. If you hand-edit a hook, keep it LF — a CRLF shebang becomes `bash\r` and the hook silently dies.
+
+> [!WARNING]
+> **Untested on Windows:** the summarizer runs in a detached background subshell (`( … ) & disown` + `trap '' HUP`) so it survives you quitting mid-session. That fork/signal behavior is verified on macOS/Linux only; under MSYS/Git Bash the background write may not survive the parent exiting. The hook will *fire*, but whether the note always lands is unverified. Reports/PRs welcome.
+
+</details>
 
 **Update:** `/plugin marketplace update obsidian-chronicle` then `/plugin update obsidian-chronicle@obsidian-chronicle`.
 

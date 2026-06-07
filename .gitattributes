@@ -1,0 +1,6 @@
+# Hook/command scripts are run by bash (sh -c on macOS/Linux, Git Bash on
+# Windows). They MUST stay LF: on a Windows checkout with core.autocrlf=true a
+# CRLF line ending turns the shebang `#!/bin/bash` into a request for `bash\r`,
+# and the hook dies before it runs. Force LF regardless of the user's git config.
+*.sh text eol=lf
+hooks/* text eol=lf
