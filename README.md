@@ -11,9 +11,9 @@
 
 <br>
 
-<img src="assets/demo-en.gif" alt="obsidian-chronicle demo — end a Claude Code session and a structured Obsidian note plus a Daily Note line appear automatically; resume the session and it appends to the same note with no duplicate" width="840">
+<img src="docs/assets/demo-en.gif" alt="obsidian-chronicle demo — end a Claude Code session and a structured Obsidian note plus a Daily Note line appear automatically; resume the session and it appends to the same note with no duplicate" width="840">
 
-<sub>🇯🇵 Japanese demo: <a href="assets/demo-ja.gif">demo-ja.gif</a> · 🎞️ higher-quality MP4: <a href="assets/demo-en.mp4">demo-en.mp4</a></sub>
+<sub>🇯🇵 Japanese demo: <a href="docs/assets/demo-ja.gif">demo-ja.gif</a> · 🎞️ higher-quality MP4: <a href="docs/assets/demo-en.mp4">demo-en.mp4</a></sub>
 
 </div>
 
@@ -185,7 +185,7 @@ Built to run for months without writing junk:
 
 ## 📊 Comparison
 
-How it compares to other Claude Code journaling tools → **[COMPARISON.md](COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
+How it compares to other Claude Code journaling tools → **[COMPARISON.md](docs/COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
 
 ## 🗑️ Uninstall
 

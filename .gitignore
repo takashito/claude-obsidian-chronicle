@@ -5,3 +5,5 @@
 .claude/settings.local.json
 # Project-local plugin config (per-machine paths; don't commit)
 .claude/obsidian-chronicle.json
+# Internal materials (promotion strategy, drafts, etc.; not for the public repo)
+.internal/
