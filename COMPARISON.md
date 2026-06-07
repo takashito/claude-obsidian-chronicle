@@ -1,23 +1,21 @@
 # How obsidian-chronicle compares
 
-A few Claude Code plugins touch session logging, journaling, or Obsidian — but
+A few Claude Code plugins overlap with session logging and journaling — but
 they mostly solve *different* problems. Here's the map.
 
 ## At a glance
 
 <sub>✅ built-in · 🟡 manual · — not what it's for</sub>
 
-| Capability | **chronicle** | session-logger | timelog | dev-journal | claude-sessions | obsidian-claude-code |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|
-| Runs automatically (hooks) | ✅ | ✅ | ✅ | — | — | — |
-| AI-written prose summary | ✅ | — | — | 🟡 | — | — |
-| Writes into Obsidian Daily Notes | ✅ | — | — | — | — | — |
-| Resume-aware (no duplicate notes) | ✅ | — | — | — | — | — |
-| Semantic frontmatter (task/research) | ✅ | — | — | — | — | — |
-| Per-tool audit trail | — | ✅ | — | — | — | — |
-| Time / billing metrics | — | — | ✅ | — | — | — |
-| Visual timeline in Obsidian | — | — | — | — | ✅ | — |
-| Chat inside Obsidian | — | — | — | — | — | ✅ |
+| Capability | **chronicle** | session-logger | timelog | dev-journal |
+|---|:--:|:--:|:--:|:--:|
+| Runs automatically (hooks) | ✅ | ✅ | ✅ | — |
+| AI-written prose summary | ✅ | — | — | 🟡 |
+| Writes into Obsidian Daily Notes | ✅ | — | — | — |
+| Resume-aware (no duplicate notes) | ✅ | — | — | — |
+| Semantic frontmatter (task/research) | ✅ | — | — | — |
+| Per-tool audit trail | — | ✅ | — | — |
+| Time / billing metrics | — | — | ✅ | — |
 
 ## The plugins
 
@@ -27,8 +25,6 @@ they mostly solve *different* problems. Here's the map.
 | [claude-session-logger](https://github.com/DazzleML/claude-session-logger) | Real-time per-tool audit log to `~/.claude/sesslogs/` |
 | [claude-code-timelog](https://github.com/RemoteCTO/claude-code-timelog) | Time tracking for billing / invoicing |
 | [dev-journal](https://github.com/juliuszfedyk/dev-journal) | Manual `/journal` decision entries committed to your repo |
-| [claude-sessions](https://github.com/gapmiss/claude-sessions) | Obsidian plugin that renders `.jsonl` as visual timelines |
-| [obsidian-claude-code](https://github.com/Roasbeef/obsidian-claude-code) | Claude as a chat sidebar inside Obsidian |
 
 ## TL;DR
 
@@ -45,6 +41,4 @@ three side by side: **chronicle** for journaling, **timelog** for invoicing,
 [session-logger](https://github.com/DazzleML/claude-session-logger) ·
 [timelog](https://github.com/RemoteCTO/claude-code-timelog) ·
 [dev-journal](https://github.com/juliuszfedyk/dev-journal) ·
-[claude-sessions](https://github.com/gapmiss/claude-sessions) ·
-[obsidian-claude-code](https://github.com/Roasbeef/obsidian-claude-code) ·
 [Hooks reference](https://code.claude.com/docs/en/hooks)</sub>
