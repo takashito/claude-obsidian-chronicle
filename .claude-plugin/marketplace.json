@@ -1,0 +1,13 @@
+{
+  "name": "obsidian-chronicle",
+  "owner": {
+    "name": "taito"
+  },
+  "plugins": [
+    {
+      "name": "obsidian-chronicle",
+      "source": "./",
+      "description": "Integrated Obsidian plugin: the obsidian-vault agent is the unified handler for all vault work (add/change/delete/organize/search notes, tasks, canvases, bases), plus automatic recording of Claude Code session summaries + Daily Notes via /done and SessionEnd/PreCompact."
+    }
+  ]
+}

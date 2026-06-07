@@ -1,0 +1,32 @@
+{
+  "name": "obsidian-chronicle",
+  "version": "0.1.0",
+  "description": "Integrated Obsidian vault + Claude Code chronicle plugin with two pillars. (1) The obsidian-vault agent — the single, unified handler for ALL Obsidian vault work: adding, updating, deleting, organizing, searching, and analyzing notes, tasks, properties, canvases, and bases with correct wikilink/frontmatter/daily-note semantics (the main session delegates vault work to it instead of using generic file tools). (2) Automatic session recording — auto-generates Obsidian-format session summaries and Daily Note entries from Claude Code sessions (task accomplishments, research findings, decisions), with mid-session checkpoints via /done and the SessionEnd/PreCompact hooks. Configure with /obsidian-chronicle:setup.",
+  "author": {
+    "name": "taito"
+  },
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/session-summary.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "REASON_OVERRIDE=precompact \"${CLAUDE_PLUGIN_ROOT}/hooks/session-summary.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}
