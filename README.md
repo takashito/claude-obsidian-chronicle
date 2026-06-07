@@ -165,7 +165,7 @@ Built to run for months without writing junk:
 
 ## 📊 Comparison
 
-How it compares to other Claude Code session-logging / journaling tools → **[COMPARISON.md](COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
+How it compares to other Claude Code journaling tools → **[COMPARISON.md](COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
 
 ## 🗑️ Uninstall
 
