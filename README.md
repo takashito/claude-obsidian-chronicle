@@ -15,29 +15,35 @@
 
 End a session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a few seconds later a summary note lands in your vault and today's Daily Note gets one more line. No clicks, no manual journaling.
 
+A finished session becomes a structured note:
+
 ```markdown
-─── <Vault>/Sessions/session-summary.sh の復元.md ───
+─── <Vault>/Sessions/Restore session-summary.sh.md ───
 ---
-title: session-summary.sh の復元
+title: Restore session-summary.sh
 classification: task
 session_id: 65a0ebe9-…
 tags: [claude-session]
 ---
-# session-summary.sh の復元
-## 🎯 ゴール … ## 💡 主要な判断 … ## 📝 変更ファイル … > [!success] 結果 …
+# Restore session-summary.sh
+## 🎯 Goal … ## 💡 Key Decisions … ## 📝 Files Changed … > [!success] Result …
 ```
+
+…and today's Daily Note gets one line linking back to it:
+
 ```markdown
 ─── <Vault>/Sessions/Daily Notes/2026-05-29.md (appended) ───
-> [!success]+ ✅ session-summary.sh の復元
-> [[session-summary.sh の復元]]
+> [!success]+ ✅ Restore session-summary.sh
+> [[Restore session-summary.sh]]
 ```
+
+> [!NOTE]
+> Summary language is set by the prompt in `hooks/session-summary.sh` — edit it to write notes in whatever language you want.
 
 - **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
 - **Two vault modes** — one machine-wide vault, or a per-project vault (e.g. a project wiki).
 - **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
-
-> Summaries are written in **Japanese** (English kept for code/file/tool names) — that's how the prompt is tuned. Want another language? Edit the prompt in `hooks/session-summary.sh`.
 
 ## Install
 
@@ -77,14 +83,26 @@ git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-ob
 | auto-compact | context fills up |
 | `/obsidian-chronicle:done` | manual mid-session checkpoint (queues in background, one-line ack) |
 
-Won't fire on `kill -9`, on closing the VS Code panel without `/clear` (use `/done`), or on idle disconnect.
+> [!WARNING]
+> Won't fire on `kill -9`, on closing the VS Code panel without `/clear` (use `/done`), or on idle disconnect.
 
+> [!NOTE]
 > GUI front-ends (Claudian, etc.) work fine — transcripts still land in `~/.claude/projects/…` and `SessionEnd` gets the exact path. For `/done`, `done-runner.sh` finds the session via `CLAUDE_SESSION_ID` → Claudian metadata → newest transcript.
 
 ## How it works
 
-```
-SessionEnd / PreCompact / /done  →  session-summary.sh  →  claude -p (haiku)  →  <Title>.md + Daily Note line
+```mermaid
+flowchart LR
+    A[SessionEnd]:::trig --> S
+    B[PreCompact]:::trig --> S
+    C["/done"]:::trig --> S
+    S["session-summary.sh<br/>(detached subshell)"] --> E["jq extract<br/>~1MB → ~14%"]
+    E --> D{"dedup by<br/>session_id"}
+    D -->|new| W["claude -p · haiku"]
+    D -->|resumed| W
+    W --> N["summary note"]
+    W --> L["Daily Note line"]
+    classDef trig fill:#d97757,color:#fff,stroke:none;
 ```
 
 `session-summary.sh` runs the whole thing in a detached background subshell, so your CLI returns instantly:
@@ -145,6 +163,10 @@ Built to run for months without writing junk:
 - **Skips, never guesses** — empty/oversized convo, `claude -p` errors, or no vault → log + exit, no garbage note.
 - **No `eval`** — config is read with `jq -r`; values never execute.
 
+## Comparison
+
+How it stacks up against other session-logging / Obsidian plugins → **[COMPARISON.md](COMPARISON.md)**. Short version: it's the only one doing *automatic AI summaries → Obsidian Daily Notes, resume-aware*.
+
 ## Uninstall
 
 ```
@@ -176,10 +198,6 @@ hooks/done-runner.sh                # simulate /done
 ```
 
 Bash 3.2 (macOS default) — no associative arrays. Summary prompts are inline in `session-summary.sh` (search `You are summarizing` / `You are extending`). No build step.
-
-## Comparison
-
-How it stacks up against other session-logging / Obsidian plugins → **[COMPARISON.md](COMPARISON.md)**. Short version: it's the only one doing *automatic AI summaries → Obsidian Daily Notes, resume-aware*.
 
 ## License
 

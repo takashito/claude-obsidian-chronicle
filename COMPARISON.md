@@ -5,6 +5,8 @@ they mostly solve *different* problems. Here's the map.
 
 ## At a glance
 
+<sub>✅ built-in · 🟡 manual · — not what it's for</sub>
+
 | Capability | **chronicle** | session-logger | timelog | dev-journal | claude-sessions | obsidian-claude-code |
 |---|:--:|:--:|:--:|:--:|:--:|:--:|
 | Runs automatically (hooks) | ✅ | ✅ | ✅ | — | — | — |
@@ -16,8 +18,6 @@ they mostly solve *different* problems. Here's the map.
 | Time / billing metrics | — | — | ✅ | — | — | — |
 | Visual timeline in Obsidian | — | — | — | — | ✅ | — |
 | Chat inside Obsidian | — | — | — | — | — | ✅ |
-
-<sub>✅ built-in · 🟡 manual · — not what it's for</sub>
 
 ## The plugins
 
@@ -32,22 +32,12 @@ they mostly solve *different* problems. Here's the map.
 
 ## TL;DR
 
-chronicle is the only one that turns finished sessions into **AI-written Obsidian
-notes wired into your Daily Notes**, and the only one that folds a resumed session
-back into its original note instead of duplicating it.
+> [!IMPORTANT]
+> chronicle is the only one that turns finished sessions into **AI-written Obsidian notes wired into your Daily Notes** — and the only one that folds a resumed session back into its original note instead of duplicating it.
 
 It's not a logger or a time tracker, and doesn't try to be. A power user runs
 three side by side: **chronicle** for journaling, **timelog** for invoicing,
 **session-logger** for incident replay.
-
-## Roadmap
-
-Nice-to-haves that would close the gaps above:
-
-- Frontmatter metrics — `duration_minutes`, `prompt_count`, `model_used`
-- Optional parallel JSONL event log — covers the crash-before-`SessionEnd` case
-- Per-classification prompt/model overrides — detailed for `task`, terse for chat
-- Inactivity auto-checkpoint — hands-off fix for "the VS Code session never ends"
 
 ---
 
