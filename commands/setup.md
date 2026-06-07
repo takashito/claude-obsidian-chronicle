@@ -61,14 +61,15 @@ Older installs used `.env`. If `$PLUGIN/.env` or `$(pwd)/.env` exists, read ONLY
 | `OBSIDIAN_CHRONICLE_MODEL` | `model` | |
 | `OBSIDIAN_CHRONICLE_LOG` | `log` | |
 
-## 6. Gather settings via AskUserQuestion (one batched call, up to 4 questions)
+## 6. Gather settings via AskUserQuestion (max 4 questions per call — use two batched calls for the 5 settings below)
 
 For each, default = existing value at the chosen file → legacy `.env` value → built-in default.
 
 1. **Vault path** (`vaultPath`) — Header: `Vault`. Options: the detected path from step 2 (recommended), `~/obsidian`. (Other = type a path.)
 2. **Sessions dir** (`sessionsDir`) — Header: `Sessions`. Relative to the vault. Options: `Sessions` (recommended), `02_Sessions`. Mention Daily Notes default to `<sessionsDir>/Daily Notes`.
-3. **Model** (`model`) — Header: `Model`. Options: `haiku` (recommended), `sonnet`, `opus`.
-4. **Log path** (`log`) — Header: `Log`. Options: `~/.local/state/obsidian-chronicle/process.log` (recommended), `~/.claude/session-summary.log`.
+3. **Language** (`language`) — Header: `Language`. The language notes are written in (summary, title, section headings). Options: `English` (recommended / built-in default), `Japanese`. (Other = type a language name verbatim, e.g. `Français`.) Passed verbatim into the summarization prompt.
+4. **Model** (`model`) — Header: `Model`. Options: `sonnet` (recommended), `haiku`, `opus`.
+5. **Log path** (`log`) — Header: `Log`. Options: `~/.local/state/obsidian-chronicle/process.log` (recommended), `~/.claude/session-summary.log`.
 
 `dailyDir` is not asked — it defaults to `<sessionsDir>/Daily Notes`. If the user wants a custom one, they can edit the JSON afterward (mention this).
 
@@ -84,9 +85,10 @@ mkdir -p "$(dirname "$DEST")"
 jq -n \
   --arg vaultPath   "$VAULTPATH" \
   --arg sessionsDir "$SESSIONSDIR" \
+  --arg language    "$LANGUAGE" \
   --arg model       "$MODEL" \
   --arg log         "$LOG" \
-  '{vaultPath:$vaultPath, sessionsDir:$sessionsDir, model:$model, log:$log}' \
+  '{vaultPath:$vaultPath, sessionsDir:$sessionsDir, language:$language, model:$model, log:$log}' \
   > "$DEST"
 ```
 
@@ -95,8 +97,8 @@ jq -n \
 **Updating an existing file** — merge so unspecified keys survive:
 ```bash
 TMP="$(mktemp)"
-jq --arg vaultPath "$VAULTPATH" --arg sessionsDir "$SESSIONSDIR" --arg model "$MODEL" --arg log "$LOG" \
-   '. * {vaultPath:$vaultPath, sessionsDir:$sessionsDir, model:$model, log:$log}' "$DEST" > "$TMP" && mv "$TMP" "$DEST"
+jq --arg vaultPath "$VAULTPATH" --arg sessionsDir "$SESSIONSDIR" --arg language "$LANGUAGE" --arg model "$MODEL" --arg log "$LOG" \
+   '. * {vaultPath:$vaultPath, sessionsDir:$sessionsDir, language:$language, model:$model, log:$log}' "$DEST" > "$TMP" && mv "$TMP" "$DEST"
 ```
 
 ## 8. Confirm

@@ -38,7 +38,7 @@ tags: [claude-session]
 ```
 
 > [!NOTE]
-> Summary language is set by the prompt in `hooks/session-summary.sh` — edit it to write notes in whatever language you want.
+> **Output language.** Notes are written in **English** by default. Set the `language` config key (e.g. `"language": "Japanese"`) — or pick it during `/obsidian-chronicle:setup` — to fully localize each note: the title (and filename), description, section headings, and callout text are all written in that language. The value is any language name, passed verbatim into the summarization prompt, so anything the model knows works (`"Français"`, `"한국어"`, …). File / function / tool names and code identifiers always stay in English; the note scaffolding is language-agnostic, so switching languages needs no code edits.
 
 - 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
@@ -98,7 +98,7 @@ flowchart LR
     C["/done"]:::trig --> S
     S["session-summary.sh<br/>(detached subshell)"] --> E["jq extract<br/>~1MB → ~14%"]
     E --> D{"dedup by<br/>session_id"}
-    D -->|new| W["claude -p · haiku"]
+    D -->|new| W["claude -p · sonnet"]
     D -->|resumed| W
     W --> N["summary note"]
     W --> L["Daily Note line"]
@@ -128,7 +128,8 @@ Merged low→high: **defaults → user → project**. `vaultPath` resolves **pro
 | `vaultPath` | _(detected)_ | vault root; absolute or `~` |
 | `sessionsDir` | `Sessions` | relative → under the vault |
 | `dailyDir` | `<sessionsDir>/Daily Notes` | |
-| `model` | `haiku` | `haiku` · `sonnet` · `opus` |
+| `model` | `sonnet` | `haiku` · `sonnet` · `opus` |
+| `language` | `English` | output language for summary / title / headings; any language name, passed verbatim to the prompt |
 | `log` | `~/.local/state/obsidian-chronicle/process.log` | activity log |
 | `minBytes` / `maxBytes` | `200` / `1000000` | skip if the extracted convo is smaller / larger |
 
@@ -151,7 +152,7 @@ Every fire logs a `start:` line and a result:
 | `skip: empty/trivial conversation` | nothing to summarize (expected) |
 | `skip: in-progress lock held` | another fire for this session is already running |
 | `fail: claude -p exit=N` | check `claude` in PATH / the `model` value / network |
-| `fail: … Prompt is too long` | raise `maxBytes`, or set `model` to `sonnet` |
+| `fail: … Prompt is too long` | set `model` to `opus` (1M context), or lower `maxBytes` to skip oversized conversations |
 
 ## 🛡️ Reliability
 

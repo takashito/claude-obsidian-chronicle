@@ -50,6 +50,7 @@ INPUT=$(cat)
   DAILY_DIR=$(printf '%s'       "$CONFIG" | jq -r '.dailyDir')
   LOG=$(printf '%s'             "$CONFIG" | jq -r '.log')
   SUMMARY_MODEL=$(printf '%s'   "$CONFIG" | jq -r '.model')
+  SUMMARY_LANGUAGE=$(printf '%s' "$CONFIG" | jq -r '.language')
   CONVO_MIN_BYTES=$(printf '%s' "$CONFIG" | jq -r '.minBytes')
   CONVO_MAX_BYTES=$(printf '%s' "$CONFIG" | jq -r '.maxBytes')
 
@@ -274,34 +275,34 @@ The conversation transcript is on stdin. The prior summary note is at the bottom
 OUTPUT FORMAT — each section starts with `@@MARKER@@` on its own line.
 
 @@DAILY_UPDATE@@
-{ONE sentence in Japanese (40-80 文字) summarizing what was done in THIS resume segment. Preserve English technical terms. No quotes, no newlines, no wikilinks.}
+{ONE concise sentence summarizing what was done in THIS resume segment. Preserve English technical terms. No quotes, no newlines, no wikilinks.}
 
 @@BODY@@
-### 🔧 新しい変更
+### 🔧 New Changes
 
-- {Japanese bullets describing NEW decisions / discoveries / fixes since the prior summary. English technical terms preserved.}
+- {Bullets describing NEW decisions / discoveries / fixes since the prior summary. Preserve English technical terms.}
 - {…}
 
 ### 📝 Files Changed (this segment)
 
-- `path/to/file.ext` — {Japanese description of what changed}
+- `path/to/file.ext` — {description of what changed}
 
 (OMIT this entire "### 📝 Files Changed (this segment)" section if nothing was edited)
 
-> [!success] 結果(this segment)
-> {2-3 sentences in Japanese describing what was completed in this segment, what works. Technical terms in English.}
+> [!success] Result (this segment)
+> {2-3 sentences describing what was completed in this segment, what works. Preserve English technical terms.}
 
 > [!todo] Next Steps
-> - [ ] {Actionable follow-up in Japanese}
+> - [ ] {Actionable follow-up}
 
-(OMIT this entire "> [!todo] Next Steps" callout if there are no real follow-ups. NEVER write a placeholder line such as `None` / `なし` / `特になし`.)
+(OMIT this entire "> [!todo] Next Steps" callout if there are no real follow-ups. NEVER write a placeholder line such as `None`.)
 
 @@END@@
 
-LANGUAGE RULES:
-- 本文は日本語、ただし file/function/tool names は ENGLISH のまま
-- 動詞は混在 OK: 「fix した」「refactor した」
-- Section headings は 上記テンプレートのまま
+TARGET LANGUAGE: '"$SUMMARY_LANGUAGE"'
+- Write ALL prose AND section heading TEXT in '"$SUMMARY_LANGUAGE"' — translate the English heading labels above ("New Changes", "Files Changed (this segment)", "Result (this segment)", "Next Steps") into '"$SUMMARY_LANGUAGE"'.
+- Keep these VERBATIM regardless of language: the `@@…@@` marker tokens, the emoji prefixes (🔧 📝), the callout type keywords `[!success]` / `[!todo]`, and all file / directory / function / tool / identifier names (English).
+- Section structure (headings, callouts) stays as in the template above — only the wording is translated.
 
 CRITICAL OUTPUT RULES:
 - The VERY FIRST characters of your output MUST be `@@DAILY_UPDATE@@` followed by a newline. No preamble. No "Here is the addendum:". No code fence. No greetings.
@@ -317,9 +318,10 @@ CRITICAL OUTPUT RULES:
 ---END PRIOR SUMMARY---'
 
     # Haiku occasionally ignores the marker format and responds conversationally
-    # (e.g. "了解です。…") or emits a bare markdown table. One retry with a
-    # reinforced instruction recovers nearly all of these without producing
-    # garbage notes. The reinforcement is appended, not replacing the prompt,
+    # (e.g. an acknowledgement like "Sure, here you go…") or emits a bare
+    # markdown table. One retry with a reinforced instruction recovers nearly all
+    # of these without producing garbage notes. The reinforcement is appended,
+    # not replacing the prompt,
     # so the original format spec stays in view.
     ADDENDUM_RETRY_NOTE='
 
@@ -369,13 +371,14 @@ RETRY NOTE: Your previous attempt did NOT start with `@@DAILY_UPDATE@@` on line 
       attempt=$((attempt+1))
     done
 
-    # Assemble the addendum: HR + HTML-comment marker + Resumed H2 + abstract
-    # callout (re-using the DAILY_UPDATE one-liner) + LLM-written body.
+    # Assemble the addendum: HR + HTML-comment marker + resume H2 (emoji + ISO
+    # timestamp, no natural-language prose so it stays language-agnostic) +
+    # abstract callout (re-using the DAILY_UPDATE one-liner) + LLM-written body.
     {
       printf '\n---\n\n'
       printf '<!-- daily_update: %s -->\n\n' "$DAILY_UPDATE"
-      printf '## 🔁 Resumed %s\n\n' "$NOW"
-      printf '> [!abstract] このセグメントの概要\n> %s\n\n' "$DAILY_UPDATE"
+      printf '## 🔁 %s\n\n' "$NOW"
+      printf '> [!abstract]\n> %s\n\n' "$DAILY_UPDATE"
       printf '%s\n' "$BODY"
     } >> "$EXISTING_FILE"
 
@@ -410,10 +413,10 @@ The conversation transcript is on stdin.
 OUTPUT FORMAT — each section starts with `@@MARKER@@` on its own line. The automation parses these by exact text match.
 
 @@TITLE@@
-{日本語で簡潔な見出し（15-30 文字程度、体言止め）。何を達成・調査したかを表す。このタイトルはそのままファイル名になるので、次の文字は絶対に使わない: / \ : * ? " < > | # ^ [ ]。File / function / tool names などの English technical terms はそのまま含めてよい（例: 「session-summary.sh の復元」）。引用符・markdown 記法は不可。}
+{A concise title (a short noun phrase, not a full sentence) describing what was accomplished or investigated. This title becomes the filename, so NEVER use these characters: / \ : * ? " < > | # ^ [ ]. English technical terms (file / function / tool names) may be embedded verbatim (e.g. "Restore session-summary.sh"). No quotes, no markdown.}
 
 @@DESCRIPTION@@
-{ONE sentence in Japanese (40-80 文字). Preserve English technical terms verbatim. No quotes, no newlines, no wikilinks.}
+{ONE concise sentence. Preserve English technical terms verbatim. No quotes, no newlines, no wikilinks.}
 
 @@CLASSIFICATION@@
 {exactly one lowercase word: task OR research OR other}
@@ -425,37 +428,37 @@ OUTPUT FORMAT — each section starts with `@@MARKER@@` on its own line. The aut
 {comma-separated lowercase ENGLISH terms (5-10) when classification is `research`; may be empty otherwise}
 
 @@BODY@@
-## 🎯 ゴール
+## 🎯 Goal
 
-{1-2 sentence(s) in Japanese describing the user'"'"'s objective. Preserve English technical terms. Use `inline code` for files/functions/variables. Use [[wikilinks]] for concepts that would have their own vault note.}
+{1-2 sentence(s) describing the user'"'"'s objective. Preserve English technical terms. Use `inline code` for files/functions/variables. Use [[wikilinks]] for concepts that would have their own vault note.}
 
-## 💡 主要な判断
+## 💡 Key Decisions
 
-- {Decision 1 in Japanese with English technical terms. Include the *why*, not just the *what*.}
+- {Decision 1 with English technical terms. Include the *why*, not just the *what*.}
 - {Decision 2}
 - {Decision 3 — 3-6 bullets total}
 
-## 📝 変更ファイル
+## 📝 Files Changed
 
-| File | 変更内容 |
+| File | Change |
 |---|---|
-| `relative/path.ext` | {Japanese description of what changed} |
+| `relative/path.ext` | {description of what changed} |
 | `another/file.ext` | {…} |
 
-(OMIT this entire "## 📝 変更ファイル" heading AND table if no files were edited)
+(OMIT this entire "## 📝 Files Changed" heading AND table if no files were edited)
 
 ## 🔍 Findings
 
-{INCLUDE this section ONLY when classification is `research`. 3-6 bullets of what was learned, with specific file paths / function names / numbers. Japanese with English technical terms. OMIT this whole section otherwise.}
+{INCLUDE this section ONLY when classification is `research`. 3-6 bullets of what was learned, with specific file paths / function names / numbers. Preserve English technical terms. OMIT this whole section otherwise.}
 
-> [!success] 結果
-> {2-3 sentences in Japanese describing what was completed, what works, what was verified. English technical terms preserved.}
+> [!success] Result
+> {2-3 sentences describing what was completed, what works, what was verified. Preserve English technical terms.}
 
 > [!todo] Next Steps
-> - [ ] {Actionable follow-up in Japanese with English technical terms}
+> - [ ] {Actionable follow-up with English technical terms}
 > - [ ] {Another actionable follow-up if any}
 
-(OMIT this entire "> [!todo] Next Steps" callout if the session finished cleanly with no real follow-ups. NEVER write a placeholder line such as `None` / `なし` / `特になし`.)
+(OMIT this entire "> [!todo] Next Steps" callout if the session finished cleanly with no real follow-ups. NEVER write a placeholder line such as `None`.)
 
 ---
 
@@ -463,20 +466,16 @@ OUTPUT FORMAT — each section starts with `@@MARKER@@` on its own line. The aut
 
 @@END@@
 
-LANGUAGE RULES:
-- 本文は日本語で書く (Goal, 主要な判断, 結果, Next Steps の中身)
-- 以下は ENGLISH のまま保持する (DO NOT translate):
-  * File / directory names: `session-summary.sh`, `.env`, `hooks/`
-  * Code identifiers: `extract_marker`, `SESSION_ID`, `claude -p`, `printf -v`
-  * Tools / libraries / products: jq, awk, bash, Slack, Obsidian, Claude Code, MCP, Bedrock
-  * Technical concepts without a clean Japanese rendering: hook, dispatcher, transcript, telemetry, marker, payload, callout, frontmatter, wikilink, embed, schema, prompt, plugin, repository
-- 動詞は混在 OK: 「build した」「refactor した」「test を pass した」のように使う
-- TITLE は日本語で書く（File / function / tool names などの technical terms は English のまま埋め込んでよい）
-- KEYWORDS は ENGLISH only
-- Section headings (## 🎯 ゴール etc.) は 上記テンプレートのまま — 翻訳・変更しない
+TARGET LANGUAGE: '"$SUMMARY_LANGUAGE"'
+- Write ALL prose in '"$SUMMARY_LANGUAGE"': the TITLE, DESCRIPTION, and the BODY content (Goal, Key Decisions, Findings, Result, Next Steps).
+- Translate the English section heading labels above ("Goal", "Key Decisions", "Files Changed", "Findings", "Result", "Next Steps") and the table header ("File" / "Change") into '"$SUMMARY_LANGUAGE"'.
+- Keep these VERBATIM regardless of language (DO NOT translate):
+  * The `@@…@@` marker tokens, the emoji prefixes (🎯 💡 📝 🔍), the callout type keywords `[!success]` / `[!todo]`, and the table/list markdown structure.
+  * File / directory names (`session-summary.sh`, `hooks/`), code identifiers (`extract_marker`, `SESSION_ID`, `claude -p`), tools / libraries / products (jq, awk, bash, Slack, Obsidian, Claude Code, MCP), and technical concepts that have no clean rendering (hook, transcript, marker, payload, callout, frontmatter, wikilink, schema, prompt, plugin, repository).
+- KEYWORDS and the trailing #tags are ENGLISH only, regardless of TARGET LANGUAGE.
 
 CRITICAL OUTPUT RULES:
-- The VERY FIRST characters of your output MUST be `@@TITLE@@` followed by a newline. No preamble. No "Here is the summary:". No "これで完了です". No code fence wrapper.
+- The VERY FIRST characters of your output MUST be `@@TITLE@@` followed by a newline. No preamble. No "Here is the summary:" or any completion pleasantry in any language. No code fence wrapper.
 - Emit every marker exactly as shown above, on its own line, in this order, exactly once.
 - DO NOT echo or quote messages verbatim from the conversation. Synthesize new prose.
 - DO NOT output lines that begin with `✓`, `>` (outside the callouts shown above), or `<command-name>` — these are conversation artifacts, not summary content.
@@ -485,8 +484,8 @@ CRITICAL OUTPUT RULES:
 - If the conversation has no real user work (e.g. it is mostly plugin echoes or an empty session), respond with EXACTLY the single line `SKIP` and nothing else. The pipeline will drop the note rather than write garbage.'
 
   # Haiku occasionally ignores the marker format — sometimes it responds
-  # conversationally to the last user turn ("了解です。…"), sometimes it
-  # emits a bare markdown table. One retry with a reinforced instruction
+  # conversationally to the last user turn (an acknowledgement like "Sure…"),
+  # sometimes it emits a bare markdown table. One retry with a reinforced instruction
   # recovers nearly all of these. The reinforcement is appended so the
   # original format spec stays in view.
   SUMMARY_RETRY_NOTE='
@@ -597,7 +596,7 @@ RETRY NOTE: Your previous attempt did NOT start with `@@TITLE@@` on line 1. Do n
     printf 'tags: [claude-session]\n'
     printf '%s\n\n' "---"
     printf '# %s\n\n' "$TITLE"
-    printf '> [!abstract] 概要\n> %s\n\n' "$DESCRIPTION"
+    printf '> [!abstract]\n> %s\n\n' "$DESCRIPTION"
     printf '%s\n' "$BODY"
   } > "$FILE"
 

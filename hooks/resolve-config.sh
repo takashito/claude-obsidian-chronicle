@@ -93,7 +93,7 @@ PROJ_JSON='{}'
 
 # Built-in defaults for the non-vault keys only. vaultPath is intentionally
 # absent here so it is resolved exclusively from files / CLI / (else) none.
-DEFAULTS='{"sessionsDir":"Sessions","model":"haiku","minBytes":200,"maxBytes":1000000}'
+DEFAULTS='{"sessionsDir":"Sessions","model":"sonnet","language":"English","minBytes":200,"maxBytes":1000000}'
 
 MERGED="$(jq -nc \
   --argjson d "$DEFAULTS" \
@@ -144,7 +144,8 @@ else
   LOG="$STATE_HOME/obsidian-chronicle/process.log"
 fi
 
-MODEL="$(printf '%s' "$MERGED" | jq -r '.model // "haiku"')"
+MODEL="$(printf '%s' "$MERGED" | jq -r '.model // "sonnet"')"
+LANGUAGE="$(printf '%s' "$MERGED" | jq -r '.language // "English"')"
 MINB="$(printf '%s' "$MERGED" | jq -r '(.minBytes // 200) | (tonumber? // 200) | floor')"
 MAXB="$(printf '%s' "$MERGED" | jq -r '(.maxBytes // 1000000) | (tonumber? // 1000000) | floor')"
 
@@ -153,8 +154,9 @@ jq -nc \
   --arg sessions "$SESSIONS" \
   --arg daily "$DAILY" \
   --arg model "$MODEL" \
+  --arg language "$LANGUAGE" \
   --arg log "$LOG" \
   --argjson minBytes "$MINB" \
   --argjson maxBytes "$MAXB" \
   --arg source "$SOURCE" \
-  '{vaultPath:$vault, sessionsDir:$sessions, dailyDir:$daily, model:$model, log:$log, minBytes:$minBytes, maxBytes:$maxBytes, source:$source}'
+  '{vaultPath:$vault, sessionsDir:$sessions, dailyDir:$daily, model:$model, language:$language, log:$log, minBytes:$minBytes, maxBytes:$maxBytes, source:$source}'

@@ -76,7 +76,8 @@ assert_field "project: source" '.source' 'project'
 assert_field "project: vaultPath" '.vaultPath' '/p/vault'
 assert_field "project: sessionsDir default" '.sessionsDir' '/p/vault/Sessions'
 assert_field "project: dailyDir default" '.dailyDir' '/p/vault/Sessions/Daily Notes'
-assert_field "project: model default" '.model' 'haiku'
+assert_field "project: model default" '.model' 'sonnet'
+assert_field "project: language default" '.language' 'English'
 
 # --- 2. user only ---
 reset_configs
@@ -108,7 +109,7 @@ assert_field "none: vaultPath empty" '.vaultPath' ''
 assert_field "none: sessionsDir empty" '.sessionsDir' ''
 assert_field "none: dailyDir empty" '.dailyDir' ''
 assert_field "none: log resolved" '.log' "$STATE/obsidian-chronicle/process.log"
-assert_field "none: model default" '.model' 'haiku'
+assert_field "none: model default" '.model' 'sonnet'
 
 # --- 5. cli-fallback: no files, stub returns a path ---
 reset_configs
@@ -140,6 +141,17 @@ mkdir -p "$SANDBOX/proj/sub/deep"
 run "$SANDBOX/proj/sub/deep"
 assert_field "upward: source" '.source' 'project'
 assert_field "upward: vaultPath" '.vaultPath' '/up/vault'
+
+# --- 9b. language: user sets it, project overrides key-wise ---
+reset_configs
+write_user_config '{"vaultPath":"/u/vault","language":"Japanese"}'
+run "$SANDBOX/proj"
+assert_field "language: from user" '.language' 'Japanese'
+reset_configs
+write_user_config '{"vaultPath":"/u/vault","language":"Japanese"}'
+write_project_config "proj" '{"language":"Français"}'
+run "$SANDBOX/proj"
+assert_field "language: project overrides user" '.language' 'Français'
 
 # --- 9. search never treats $HOME as a project location ---
 reset_configs

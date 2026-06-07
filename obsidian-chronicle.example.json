@@ -13,8 +13,11 @@
   "//dailyDir": "Daily-note dir. Optional; defaults to <sessionsDir>/Daily Notes.",
   "dailyDir": "Sessions/Daily Notes",
 
-  "//model": "Model for `claude -p` summaries: haiku (recommended) | sonnet | opus.",
-  "model": "haiku",
+  "//model": "Model for `claude -p` summaries: sonnet (recommended) | haiku | opus.",
+  "model": "sonnet",
+
+  "//language": "Output language for summary / title / headings. Any language name, passed verbatim to the prompt. Defaults to English.",
+  "language": "English",
 
   "//log": "Append-only hook activity log (lives outside the vault).",
   "log": "~/.local/state/obsidian-chronicle/process.log",
