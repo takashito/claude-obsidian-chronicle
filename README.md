@@ -125,6 +125,15 @@ The setup command detects your vault (via the `obsidian` CLI) and writes an `obs
 
 Every session you end (`/clear`, `/new`, `/obsidian-chronicle:done`, quit) now auto-writes a summary into `<vault>/Sessions/` and appends a line to today's Daily Note.
 
+### Updating
+
+```
+/plugin marketplace update obsidian-chronicle
+/plugin update obsidian-chronicle@obsidian-chronicle
+```
+
+Releases are pinned by the `version` field in `plugin.json`, so you receive updates when a new version is published.
+
 ---
 
 ## 🪝 Triggers
@@ -425,4 +434,4 @@ The niche is the combination — nobody else does *automatic + Obsidian-flavored
 
 ## 📜 License
 
-MIT. See [LICENSE](LICENSE) if present, otherwise assume MIT.
+MIT — see [LICENSE](LICENSE).
