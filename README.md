@@ -19,12 +19,12 @@
 
 ---
 
-End a Claude Code session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a summary note lands in your vault, with one more line in today's Daily Note. It's summarized in the background (typically ~10–30 s, depending on session length and model), so your CLI is free immediately. No clicks, no manual journaling.
+End a Claude Code session — `/clear`, `/new`, `/exit`, auto-compact, or `/obsidian-chronicle:done` — and a summary note lands in your vault, with one more line in today's Daily Note. It's summarized in the background (typically ~10–30 s, depending on session length and model), so your CLI is free immediately. No clicks, no manual journaling.
 
 - 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
 - 🗂️ **Two vault modes** — one user-level vault shared across your machine, or a per-project vault (e.g. a project wiki).
-- 🛡️ **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
+- 🛡️ **Hardened** — recursion guard, survives exit mid-write, skips rather than writing garbage.
 
 ## 🚀 Install
 
@@ -49,7 +49,7 @@ The hooks are bash scripts. Claude Code runs hook commands through **Git Bash** 
 - **Line endings matter.** The repo ships a `.gitattributes` that forces `*.sh` to LF, so a normal checkout is fine. If you hand-edit a hook, keep it LF — a CRLF shebang becomes `bash\r` and the hook silently dies.
 
 > [!WARNING]
-> **Untested on Windows:** the summarizer runs in a detached background subshell (`( … ) & disown` + `trap '' HUP`) so it survives you quitting mid-session. That fork/signal behavior is verified on macOS/Linux only; under MSYS/Git Bash the background write may not survive the parent exiting. The hook will *fire*, but whether the note always lands is unverified. Reports/PRs welcome.
+> **Untested on Windows:** the summarizer runs in a detached background subshell (`( … ) & disown` + `trap '' HUP`) so it survives you exiting mid-session. That fork/signal behavior is verified on macOS/Linux only; under MSYS/Git Bash the background write may not survive the parent exiting. The hook will *fire*, but whether the note always lands is unverified. Reports/PRs welcome.
 
 </details>
 
@@ -75,7 +75,7 @@ git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-ob
 
 | Trigger | When |
 |---|---|
-| `/clear`, `/new`, quit | you end or restart a session |
+| `/clear`, `/new`, `/exit` | you end or restart a session |
 | auto-compact | context fills up |
 | `/obsidian-chronicle:done` | manual mid-session checkpoint (queues in background, one-line ack) |
 
@@ -147,7 +147,7 @@ How it compares to other Claude Code journaling tools → **[COMPARISON.md](docs
 Built to run for months without writing junk:
 
 - **Recursion guard** — `claude -p` spawns its own session; a flag stops the inner `SessionEnd` from recursing.
-- **Survives quit** — `trap '' HUP` lets the summary finish even if you exit mid-write.
+- **Survives exit** — `trap '' HUP` lets the summary finish even if you exit mid-write.
 - **Per-session lock** — `PreCompact` + `/done` + `SessionEnd` can't double-write the same session.
 - **Skips, never guesses** — empty/oversized convo, `claude -p` errors, or no vault → log + exit, no garbage note.
 - **No `eval`** — config is read with `jq -r`; values never execute.
@@ -174,7 +174,7 @@ Every fire logs a `start:` line and a result:
 ## ❓ FAQ
 
 ### How do I automatically save Claude Code sessions to Obsidian?
-Install obsidian-chronicle and run `/obsidian-chronicle:setup`. From then on, ending a session (`/clear`, quit, auto-compact, or `/done`) writes a structured note to your vault and a linked line to today's Daily Note — no manual step.
+Install obsidian-chronicle and run `/obsidian-chronicle:setup`. From then on, ending a session (`/clear`, `/exit`, auto-compact, or `/done`) writes a structured note to your vault and a linked line to today's Daily Note — no manual step.
 
 ### Does it create a new note every time I resume a session?
 No. Resumed sessions are matched by `session_id` and **appended to the same note**, so one task stays one note (no duplicates).

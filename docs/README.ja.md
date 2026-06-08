@@ -19,7 +19,7 @@
 
 ---
 
-Claude Code のセッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。要約はバックグラウンドで実行され（セッションの長さやモデルにもよりますが、だいたい 10〜30 秒）、コマンドはすぐに使えるようになります。クリックも手動のジャーナリングも不要です。
+Claude Code のセッションを終了する（`/clear`・`/new`・`/exit`・auto-compact・`/obsidian-chronicle:done`）と、要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。要約はバックグラウンドで実行され（セッションの長さやモデルにもよりますが、だいたい 10〜30 秒）、コマンドはすぐに使えるようになります。クリックも手動のジャーナリングも不要です。
 
 - 🎯 **フック起動で確実** — `SessionEnd` / `PreCompact` / `/done` で発火。気まぐれに頼らず決定論的に動きます。
 - 🔁 **再開対応** — セッションを再開すると同じノートに追記（`session_id` で照合）、重複を作らない。
@@ -75,7 +75,7 @@ git clone https://github.com/takashito/claude-obsidian-chronicle ~/dev/claude-ob
 
 | トリガー | タイミング |
 |---|---|
-| `/clear`・`/new`・終了 | セッションを終了 / 再起動したとき |
+| `/clear`・`/new`・`/exit` | セッションを終了 / 再起動したとき |
 | auto-compact | コンテキストが一杯になったとき |
 | `/obsidian-chronicle:done` | セッション途中の手動チェックポイント（バックグラウンドにキュー、1行で確認応答） |
 
@@ -174,7 +174,7 @@ tail -f ~/.local/state/obsidian-chronicle/process.log
 ## ❓ よくある質問
 
 ### Claude Code のセッションを自動で Obsidian に保存するには？
-obsidian-chronicle をインストールして `/obsidian-chronicle:setup` を実行します。以降、セッションを終了する（`/clear`・終了・auto-compact・`/done`）たびに、構造化ノートが Vault に、リンク行が今日の Daily Note に書き込まれます — 手動操作は不要です。
+obsidian-chronicle をインストールして `/obsidian-chronicle:setup` を実行します。以降、セッションを終了する（`/clear`・`/exit`・auto-compact・`/done`）たびに、構造化ノートが Vault に、リンク行が今日の Daily Note に書き込まれます — 手動操作は不要です。
 
 ### セッションを再開するたびに新しいノートが作られますか？
 いいえ。再開したセッションは `session_id` で照合され、**同じノートに追記**されます。1タスク = 1ノートのまま（重複なし）です。
