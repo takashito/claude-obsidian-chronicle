@@ -4,6 +4,8 @@
 
 **Every Claude Code session, auto-written as a structured Obsidian note + a Daily Note line.**
 
+📖 English · [日本語](docs/README.ja.md)
+
 ![bash](https://img.shields.io/badge/bash-3.2%2B-89e051)
 ![claude--code](https://img.shields.io/badge/claude--code-%E2%89%A52.1-d97757)
 [![CI](https://github.com/takashito/claude-obsidian-chronicle/actions/workflows/ci.yml/badge.svg)](https://github.com/takashito/claude-obsidian-chronicle/actions/workflows/ci.yml)
@@ -12,8 +14,6 @@
 <br>
 
 <img src="docs/assets/demo-en.gif" alt="obsidian-chronicle demo — end a Claude Code session and a structured Obsidian note plus a Daily Note line appear automatically; resume the session and it appends to the same note with no duplicate" width="840">
-
-<sub>🇯🇵 Japanese demo: <a href="docs/assets/demo-ja.gif">demo-ja.gif</a> · 🎞️ higher-quality MP4: <a href="docs/assets/demo-en.mp4">demo-en.mp4</a></sub>
 
 </div>
 
