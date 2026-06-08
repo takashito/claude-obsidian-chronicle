@@ -19,7 +19,7 @@
 
 ---
 
-Claude Code のセッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、数秒後には要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。クリックも手動のジャーナリングも不要です。
+Claude Code のセッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。要約はバックグラウンドで実行され（セッションの長さやモデルにもよりますが、だいたい 10〜30 秒）、コマンドはすぐに使えるようになります。クリックも手動のジャーナリングも不要です。
 
 - 🎯 **フック起動で確実** — `SessionEnd` / `PreCompact` / `/done` で発火。気まぐれに頼らず決定論的に動きます。
 - 🔁 **再開対応** — セッションを再開すると同じノートに追記（`session_id` で照合）、重複を作らない。

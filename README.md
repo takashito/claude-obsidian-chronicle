@@ -19,7 +19,7 @@
 
 ---
 
-End a Claude Code session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a few seconds later a summary note lands in your vault and today's Daily Note gets one more line. No clicks, no manual journaling.
+End a Claude Code session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a summary note lands in your vault, with one more line in today's Daily Note. It's summarized in the background (typically ~10–30 s, depending on session length and model), so your CLI is free immediately. No clicks, no manual journaling.
 
 - 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
