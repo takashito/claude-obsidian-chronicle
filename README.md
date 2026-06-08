@@ -236,6 +236,10 @@ hooks/done-runner.sh                # simulate /done
 
 Bash 3.2 (macOS default) — no associative arrays. Summary prompts are inline in `session-summary.sh` (search `You are summarizing` / `You are extending`). No build step.
 
+## 🤝 Contributing
+
+Bug reports, ideas, and PRs welcome — see **[CONTRIBUTING.md](.github/CONTRIBUTING.md)** for the dev/test workflow and the hard constraints (bash 3.2, fail-safe, no `eval`).
+
 ## 📜 License
 
 MIT — see [LICENSE](LICENSE).

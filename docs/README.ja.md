@@ -236,6 +236,10 @@ hooks/done-runner.sh                # /done をシミュレート
 
 Bash 3.2（macOS 標準）— 連想配列なし。要約プロンプトは `session-summary.sh` にインライン（`You are summarizing` / `You are extending` で検索）。ビルド手順なし。
 
+## 🤝 コントリビュート
+
+バグ報告・提案・PR を歓迎します — 開発/テストの流れと守るべき制約（bash 3.2・fail-safe・`eval` 不使用）は **[CONTRIBUTING.md](../.github/CONTRIBUTING.md)** を参照してください。
+
 ## 📜 ライセンス
 
 MIT — [LICENSE](../LICENSE) を参照。
