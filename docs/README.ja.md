@@ -21,28 +21,6 @@
 
 セッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、数秒後には要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。クリックも手動のジャーナリングも不要です。
 
-終わったセッションは、構造化ノートになります:
-
-```markdown
-─── <Vault>/Sessions/Restore session-summary.sh.md ───
----
-title: Restore session-summary.sh
-classification: task
-session_id: 65a0ebe9-…
-tags: [claude-session]
----
-# Restore session-summary.sh
-## 🎯 Goal … ## 💡 Key Decisions … ## 📝 Files Changed … > [!success] Result …
-```
-
-…そして今日の Daily Note には、そこへリンクする1行が追加されます:
-
-```markdown
-─── <Vault>/Sessions/Daily Notes/2026-05-29.md (appended) ───
-> [!success]+ ✅ Restore session-summary.sh
-> [[Restore session-summary.sh]]
-```
-
 > [!NOTE]
 > **出力言語。** ノートはデフォルトで **英語** で書かれます。`language` 設定キー（例: `"language": "Japanese"`）を指定するか、`/obsidian-chronicle:setup` で選ぶと、各ノートが完全にローカライズされます。タイトル（およびファイル名）、説明、セクション見出し、コールアウトのテキストがすべてその言語で書かれます。値は任意の言語名で、要約プロンプトにそのまま渡されるため、モデルが知っている言語なら何でも動きます（`"Français"`、`"한국어"` …）。ファイル名 / 関数名 / ツール名・コード識別子は常に英語のままです。ノートの骨組みは言語非依存なので、言語の切り替えにコード変更は要りません。
 
@@ -215,28 +193,6 @@ rm -rf ~/.local/state/obsidian-chronicle   # 任意: ログ + 設定
 ```
 
 ノートはそのまま残ります。
-
-## 🧪 開発
-
-```
-.claude-plugin/{plugin,marketplace}.json   マニフェスト
-commands/{setup,done}.md                    スラッシュコマンド
-hooks/session-summary.sh                    本体（ライター）
-hooks/resolve-config.sh                     設定リゾルバ
-hooks/done-runner.sh                        /done の裏側
-tests/test-resolve-config.sh                ユニットテスト
-```
-
-```bash
-# 合成ペイロードでフックを発火
-echo '{"session_id":"test","transcript_path":"/path/real.jsonl","cwd":"/tmp","reason":"clear"}' \
-  | hooks/session-summary.sh
-
-bash tests/test-resolve-config.sh   # テスト実行
-hooks/done-runner.sh                # /done をシミュレート
-```
-
-Bash 3.2（macOS 標準）— 連想配列なし。要約プロンプトは `session-summary.sh` にインライン（`You are summarizing` / `You are extending` で検索）。ビルド手順なし。
 
 ## 🤝 コントリビュート
 

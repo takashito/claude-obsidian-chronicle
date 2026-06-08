@@ -14,13 +14,13 @@ Thanks for your interest — bug reports, ideas, and PRs are all welcome. This i
 ## Project layout
 
 ```
-.claude-plugin/{plugin,marketplace}.json   manifests
-commands/{setup,done}.md                    slash commands
-hooks/session-summary.sh                    the writer (the engine, ~660 lines)
-hooks/resolve-config.sh                     config resolver (single source of truth for paths)
-hooks/done-runner.sh                        backs /done (locates the transcript)
-tests/test-resolve-config.sh                unit tests for the resolver
-docs/                                        README.ja.md, COMPARISON.md, assets/
+.claude-plugin/{plugin,marketplace}.json  manifests
+commands/{setup,done}.md                  slash commands
+hooks/session-summary.sh                  the writer (the engine, ~660 lines)
+hooks/resolve-config.sh                   config resolver (single source of truth for paths)
+hooks/done-runner.sh                      backs /done (locates the transcript)
+tests/test-resolve-config.sh              unit tests for the resolver
+docs/                                     README.ja.md, COMPARISON.md, assets/
 ```
 
 ## Development setup

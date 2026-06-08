@@ -21,28 +21,6 @@
 
 End a session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a few seconds later a summary note lands in your vault and today's Daily Note gets one more line. No clicks, no manual journaling.
 
-A finished session becomes a structured note:
-
-```markdown
-─── <Vault>/Sessions/Restore session-summary.sh.md ───
----
-title: Restore session-summary.sh
-classification: task
-session_id: 65a0ebe9-…
-tags: [claude-session]
----
-# Restore session-summary.sh
-## 🎯 Goal … ## 💡 Key Decisions … ## 📝 Files Changed … > [!success] Result …
-```
-
-…and today's Daily Note gets one line linking back to it:
-
-```markdown
-─── <Vault>/Sessions/Daily Notes/2026-05-29.md (appended) ───
-> [!success]+ ✅ Restore session-summary.sh
-> [[Restore session-summary.sh]]
-```
-
 > [!NOTE]
 > **Output language.** Notes are written in **English** by default. Set the `language` config key (e.g. `"language": "Japanese"`) — or pick it during `/obsidian-chronicle:setup` — to fully localize each note: the title (and filename), description, section headings, and callout text are all written in that language. The value is any language name, passed verbatim into the summarization prompt, so anything the model knows works (`"Français"`, `"한국어"`, …). File / function / tool names and code identifiers always stay in English; the note scaffolding is language-agnostic, so switching languages needs no code edits.
 
@@ -215,28 +193,6 @@ rm -rf ~/.local/state/obsidian-chronicle   # optional: logs + config
 ```
 
 Your notes stay where they are.
-
-## 🧪 Development
-
-```
-.claude-plugin/{plugin,marketplace}.json   manifests
-commands/{setup,done}.md                    slash commands
-hooks/session-summary.sh                    the writer
-hooks/resolve-config.sh                     config resolver
-hooks/done-runner.sh                        backs /done
-tests/test-resolve-config.sh                unit tests
-```
-
-```bash
-# fire a hook with a synthetic payload
-echo '{"session_id":"test","transcript_path":"/path/real.jsonl","cwd":"/tmp","reason":"clear"}' \
-  | hooks/session-summary.sh
-
-bash tests/test-resolve-config.sh   # run the tests
-hooks/done-runner.sh                # simulate /done
-```
-
-Bash 3.2 (macOS default) — no associative arrays. Summary prompts are inline in `session-summary.sh` (search `You are summarizing` / `You are extending`). No build step.
 
 ## 🤝 Contributing
 
