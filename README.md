@@ -187,6 +187,23 @@ Built to run for months without writing junk:
 
 How it compares to other Claude Code journaling tools → **[COMPARISON.md](docs/COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
 
+## ❓ FAQ
+
+### How do I automatically save Claude Code sessions to Obsidian?
+Install obsidian-chronicle and run `/obsidian-chronicle:setup`. From then on, ending a session (`/clear`, quit, auto-compact, or `/done`) writes a structured note to your vault and a linked line to today's Daily Note — no manual step.
+
+### Does it create a new note every time I resume a session?
+No. Resumed sessions are matched by `session_id` and **appended to the same note**, so one task stays one note (no duplicates).
+
+### Is this an Obsidian plugin?
+No — it's a *Claude Code* plugin that writes Markdown into your Obsidian vault. You install it via Claude Code's `/plugin`, not Obsidian's community-plugin browser.
+
+### Can it write notes in a language other than English?
+Yes. Set the `language` config key (e.g. `"language": "Japanese"`) and the whole note — title, headings, callouts — is written in that language. File/function names stay in English.
+
+### Does it need a daemon, Python, or a build step?
+No. Pure bash + jq. macOS/Linux are supported; Windows is experimental.
+
 ## 🗑️ Uninstall
 
 ```
