@@ -104,7 +104,7 @@ flowchart LR
 `session-summary.sh` runs the whole thing in a detached background subshell, so your CLI returns instantly:
 
 1. **Resolve config** (`resolve-config.sh`) — vault path, model, dirs.
-2. **Extract** — `jq` strips the JSONL to user/assistant prose; tool I/O collapses to `[tool_use: Bash]` markers (~1 MB → ~14%), so it never blows Haiku's context.
+2. **Extract** — `jq` strips the JSONL to user/assistant prose; tool I/O is collapsed (~1 MB → ~14%), so it never blows Sonnet's context.
 3. **Dedup** by `session_id` — fresh note, or an addendum if the session was resumed.
 4. **Summarize** with `claude -p`, write the note, append the Daily Note.
 

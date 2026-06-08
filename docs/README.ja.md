@@ -104,7 +104,7 @@ flowchart LR
 `session-summary.sh` は全処理をデタッチされたバックグラウンドサブシェルで実行するため、コマンドはすぐに返ってきます:
 
 1. **設定を解決**（`resolve-config.sh`）— Vault パス、モデル、ディレクトリ。
-2. **抽出** — `jq` が JSONL を user/assistant の発話だけに削ぎ落とし、ツール I/O は `[tool_use: Bash]` マーカーに圧縮（~1 MB → ~14%）。Haiku のコンテキストを溢れさせません。
+2. **抽出** — `jq` が JSONL を user/assistant の発話だけに削ぎ落とし、ツール I/O は圧縮（~1 MB → ~14%）。Sonnet のコンテキストを溢れさせません。
 3. **重複排除** — `session_id` で照合し、新規ノートか、再開なら追記（addendum）。
 4. **要約** — `claude -p` で要約し、ノートを書き、Daily Note に追記。
 
