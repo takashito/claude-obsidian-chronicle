@@ -13,7 +13,7 @@
 
 <br>
 
-<img src="docs/assets/demo-en.gif" alt="obsidian-chronicle demo — end a Claude Code session and a structured Obsidian note plus a Daily Note line appear automatically; resume the session and it appends to the same note with no duplicate" width="840">
+<img src="docs/assets/demo-en.gif" alt="obsidian-chronicle demo: ending a Claude Code session writes a structured Obsidian note and a Daily Note line; resuming appends to the same note, no duplicate" width="840">
 
 </div>
 
@@ -48,7 +48,7 @@ tags: [claude-session]
 
 - 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
-- 🗂️ **Two vault modes** — one machine-wide vault, or a per-project vault (e.g. a project wiki).
+- 🗂️ **Two vault modes** — one user-level vault shared across your machine, or a per-project vault (e.g. a project wiki).
 - 🛡️ **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
 
 ## 🚀 Install
@@ -59,7 +59,7 @@ tags: [claude-session]
 /obsidian-chronicle:setup
 ```
 
-`setup` auto-detects your vault (via the `obsidian` CLI if you have it), asks machine-wide vs per-project, and writes the config. That's it.
+`setup` auto-detects your vault (via the `obsidian` CLI if you have it), asks user-level vs per-project, and writes the config. That's it.
 
 **Requirements:** Claude Code ≥ 2.1, `jq`, bash 3.2+, an Obsidian vault. **macOS / Linux are supported; Windows is experimental — see below.** The [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) is optional (vault auto-detect).
 
@@ -133,14 +133,16 @@ flowchart LR
 
 ## 🔧 Configuration
 
-One JSON file — machine-wide or per-project.
+One JSON file. You can place it at either of two levels — copy [`obsidian-chronicle.example.json`](obsidian-chronicle.example.json) as a starting point:
 
-| Scope | Path |
-|---|---|
-| machine-wide | `${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json` |
-| per-project | `<repo>/.claude/obsidian-chronicle.json` (searched upward from cwd) |
+| Scope | Path | Applies to |
+|---|---|---|
+| **user** | `${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json` | every project on your machine |
+| **project** | `<repo>/.claude/obsidian-chronicle.json` (searched upward from cwd) | just that one repo |
 
-Merged low→high: **defaults → user → project**. `vaultPath` resolves **project → user → `obsidian vault` CLI → skip** — no silent `~/obsidian` guess.
+**How settings combine:** built-in defaults are the base, your **user** file overrides those, and a **project** file overrides both — i.e. `defaults → user → project`, last one wins. (You only need to set the keys you want to change.)
+
+**How `vaultPath` is found:** the **project** file is checked first, then the **user** file, then the `obsidian vault` CLI (if installed). If none of those provide a vault, the hook just **skips and writes nothing** — it never guesses a path like `~/obsidian`.
 
 | Key | Default | Notes |
 |---|---|---|

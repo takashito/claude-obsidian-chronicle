@@ -88,7 +88,7 @@ By contributing, you agree your contributions are licensed under the project's [
 - What you did and what you expected vs. what happened.
 - The relevant lines from `~/.local/state/obsidian-chronicle/process.log` (a `start:` line plus its result line).
 - OS, `bash --version`, `jq --version`, and your Claude Code version.
-- Your config (redact `vaultPath` if it's sensitive) and whether it's machine-wide or per-project.
+- Your config (redact `vaultPath` if it's sensitive) and whether it's user-level or per-project.
 
 ## Security
 

@@ -19,7 +19,7 @@
 
 ---
 
-セッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、数秒後には要約ノートが Vault に届き、今日の Daily Note に1行追加されます。クリックも手動のジャーナリングも不要です。
+セッションを終了する（`/clear`・`/new`・終了・auto-compact・`/obsidian-chronicle:done`）と、数秒後には要約ノートが Vault に書き出され、今日の Daily Note に1行追加されます。クリックも手動のジャーナリングも不要です。
 
 終わったセッションは、構造化ノートになります:
 
@@ -44,11 +44,11 @@ tags: [claude-session]
 ```
 
 > [!NOTE]
-> **出力言語。** ノートはデフォルトで **英語** で書かれます。`language` 設定キー（例: `"language": "Japanese"`）を指定する — または `/obsidian-chronicle:setup` で選ぶ — と、各ノートが完全にローカライズされます。タイトル（およびファイル名）、説明、セクション見出し、コールアウトのテキストがすべてその言語で書かれます。値は任意の言語名で、要約プロンプトにそのまま渡されるため、モデルが知っている言語なら何でも動きます（`"Français"`、`"한국어"` …）。ファイル名 / 関数名 / ツール名・コード識別子は常に英語のままです。ノートの骨組みは言語非依存なので、言語の切り替えにコード変更は要りません。
+> **出力言語。** ノートはデフォルトで **英語** で書かれます。`language` 設定キー（例: `"language": "Japanese"`）を指定するか、`/obsidian-chronicle:setup` で選ぶと、各ノートが完全にローカライズされます。タイトル（およびファイル名）、説明、セクション見出し、コールアウトのテキストがすべてその言語で書かれます。値は任意の言語名で、要約プロンプトにそのまま渡されるため、モデルが知っている言語なら何でも動きます（`"Français"`、`"한국어"` …）。ファイル名 / 関数名 / ツール名・コード識別子は常に英語のままです。ノートの骨組みは言語非依存なので、言語の切り替えにコード変更は要りません。
 
-- 🎯 **フック起動・気分まかせではない** — `SessionEnd` / `PreCompact` / `/done` で発火。決定論的。
+- 🎯 **フック起動で確実** — `SessionEnd` / `PreCompact` / `/done` で発火。気まぐれに頼らず決定論的に動きます。
 - 🔁 **再開対応** — セッションを再開すると同じノートに追記（`session_id` で照合）、重複を作らない。
-- 🗂️ **2つの Vault モード** — マシン共通の Vault、またはプロジェクトごとの Vault（例: プロジェクト Wiki）。
+- 🗂️ **2つの Vault モード** — マシン全体で共有するユーザーレベルの Vault、またはプロジェクトごとの Vault（例: プロジェクト Wiki）。
 - 🛡️ **堅牢** — 再帰ガード、書き込み途中の終了に耐える、ゴミを書くくらいならスキップ。
 
 ## 🚀 インストール
@@ -59,17 +59,17 @@ tags: [claude-session]
 /obsidian-chronicle:setup
 ```
 
-`setup` が Vault を自動検出し（`obsidian` CLI があればそれ経由）、マシン共通かプロジェクト単位かを尋ね、設定を書き出します。これだけです。
+`setup` が Vault を自動検出し（`obsidian` CLI があればそれ経由）、ユーザーレベルかプロジェクト単位かを尋ねて、設定を書き出します。これだけです。
 
-**必要要件:** Claude Code ≥ 2.1、`jq`、bash 3.2+、Obsidian Vault。**macOS / Linux 対応。Windows は実験的 — 下記参照。** [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) は任意（Vault 自動検出用）。
+**必要要件:** Claude Code ≥ 2.1、`jq`、bash 3.2+、Obsidian Vault。**macOS / Linux 対応。Windows は実験的です（下記参照）。** [`obsidian` CLI](https://github.com/yakitrak/obsidian-cli) は任意（Vault 自動検出用）。
 
 <details><summary>🪟 Windows（実験的・ベストエフォート）</summary>
 
-フックは bash スクリプトです。Claude Code は Windows ではフックコマンドを **Git Bash** 経由で実行するため、動作は *します* — ただし **十分にテストされたプラットフォームではありません**。試す場合:
+フックは bash スクリプトです。Claude Code は Windows ではフックコマンドを **Git Bash** 経由で実行するため、動作は *します* が、**十分にテストされたプラットフォームではありません**。試す場合:
 
 - **[Git for Windows](https://git-scm.com/download/win) をインストール** — `bash` とスクリプトが必要とする `sed`/`awk`/`grep`/`find` の coreutils が入ります。`bash.exe` が `PATH` にない場合は Claude Code に場所を教えます: `setx CLAUDE_CODE_GIT_BASH_PATH "C:\Program Files\Git\bin\bash.exe"`。（または Linux と同様に動く **WSL** を使用。）
 - **`jq` をインストール**し `PATH` に通します（Git Bash には同梱されていません）。
-- **改行コードに注意。** リポジトリには `*.sh` を LF に固定する `.gitattributes` が含まれるため、通常のチェックアウトは問題ありません。フックを手で編集する場合は LF を維持してください — CRLF の shebang は `bash\r` になり、フックが無言で死にます。
+- **改行コードに注意。** リポジトリには `*.sh` を LF に固定する `.gitattributes` が含まれるため、通常のチェックアウトは問題ありません。フックを手で編集する場合は LF を維持してください。CRLF の shebang は `bash\r` になり、フックはエラーも出さずに失敗します。
 
 > [!WARNING]
 > **Windows では未検証:** 要約処理はデタッチされたバックグラウンドサブシェル（`( … ) & disown` + `trap '' HUP`）で動き、セッション途中で終了しても生き残ります。この fork/シグナル挙動は macOS/Linux でのみ検証済みで、MSYS/Git Bash では親プロセス終了後にバックグラウンド書き込みが生き残らない可能性があります。フックは*発火*しますが、ノートが必ず届くかは未検証です。報告・PR 歓迎。
@@ -124,7 +124,7 @@ flowchart LR
     classDef trig fill:#d97757,color:#fff,stroke:none;
 ```
 
-`session-summary.sh` は全処理をデタッチされたバックグラウンドサブシェルで実行するため、CLI は即座に返ります:
+`session-summary.sh` は全処理をデタッチされたバックグラウンドサブシェルで実行するため、コマンドはすぐに返ってきます:
 
 1. **設定を解決**（`resolve-config.sh`）— Vault パス、モデル、ディレクトリ。
 2. **抽出** — `jq` が JSONL を user/assistant の発話だけに削ぎ落とし、ツール I/O は `[tool_use: Bash]` マーカーに圧縮（~1 MB → ~14%）。Haiku のコンテキストを溢れさせません。
@@ -133,14 +133,16 @@ flowchart LR
 
 ## 🔧 設定
 
-JSON ファイル1つ — マシン共通またはプロジェクト単位。
+JSON ファイル1つ。次の2つのレベルのどちらかに置けます — 雛形として [`obsidian-chronicle.example.json`](../obsidian-chronicle.example.json) をコピーしてください:
 
-| スコープ | パス |
-|---|---|
-| マシン共通 | `${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json` |
-| プロジェクト単位 | `<repo>/.claude/obsidian-chronicle.json`（cwd から上方向に探索） |
+| スコープ | パス | 適用範囲 |
+|---|---|---|
+| **user** | `${XDG_STATE_HOME:-~/.local/state}/obsidian-chronicle/obsidian-chronicle.json` | マシン上のすべてのプロジェクト |
+| **project** | `<repo>/.claude/obsidian-chronicle.json`（cwd から上方向に探索） | そのリポジトリだけ |
 
-低→高でマージ: **デフォルト → user → project**。`vaultPath` は **project → user → `obsidian vault` CLI → スキップ** の順で解決 — `~/obsidian` を黙って推測することはありません。
+**設定の合成のされ方:** 組み込みのデフォルトが土台で、**user** ファイルがそれを上書きし、**project** ファイルが両方を上書きします。つまり `デフォルト → user → project` の順で、後に指定したものが優先されます。（変えたいキーだけ書けば十分です。）
+
+**`vaultPath` の決まり方:** まず **project** ファイル、次に **user** ファイル、次に `obsidian vault` CLI（インストールされていれば）の順で探します。どれからも Vault が得られなければ、フックは**何もせずスキップ**します。`~/obsidian` のようなパスを勝手に推測することはありません。
 
 | キー | デフォルト | 補足 |
 |---|---|---|
@@ -185,7 +187,7 @@ tail -f ~/.local/state/obsidian-chronicle/process.log
 
 ## 📊 比較
 
-他の Claude Code ジャーナリングツールとの比較 → **[COMPARISON.md](COMPARISON.md)**。要約すると: AI 要約を Obsidian に書くツールは他にもありますが、chronicle は完全にハンズオフ — *フック起動（何も実行しない）かつ再開対応* のマーケットプレイスプラグインです。
+他の Claude Code ジャーナリングツールとの比較 → **[COMPARISON.md](COMPARISON.md)**。要約すると、AI 要約を Obsidian に書くツールは他にもありますが、chronicle は完全にハンズオフで、*フック起動（何も実行しない）かつ再開対応* のマーケットプレイスプラグインです。
 
 ## ❓ よくある質問
 
