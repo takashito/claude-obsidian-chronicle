@@ -19,10 +19,7 @@
 
 ---
 
-End a session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a few seconds later a summary note lands in your vault and today's Daily Note gets one more line. No clicks, no manual journaling.
-
-> [!NOTE]
-> **Output language.** Notes are written in **English** by default. Set the `language` config key (e.g. `"language": "Japanese"`) — or pick it during `/obsidian-chronicle:setup` — to fully localize each note: the title (and filename), description, section headings, and callout text are all written in that language. The value is any language name, passed verbatim into the summarization prompt, so anything the model knows works (`"Français"`, `"한국어"`, …). File / function / tool names and code identifiers always stay in English; the note scaffolding is language-agnostic, so switching languages needs no code edits.
+End a Claude Code session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:done` — and a few seconds later a summary note lands in your vault and today's Daily Note gets one more line. No clicks, no manual journaling.
 
 - 🎯 **Hook-triggered, not vibes** — fires on `SessionEnd`, `PreCompact`, and `/done`. Deterministic.
 - 🔁 **Resume-aware** — resuming a session appends to the same note (matched by `session_id`), never a dup.
@@ -30,6 +27,8 @@ End a session — `/clear`, `/new`, quit, auto-compact, or `/obsidian-chronicle:
 - 🛡️ **Hardened** — recursion guard, survives quit mid-write, skips rather than writing garbage.
 
 ## 🚀 Install
+
+obsidian-chronicle is a **Claude Code plugin** — install it from inside Claude Code by running these slash commands:
 
 ```
 /plugin marketplace add takashito/claude-obsidian-chronicle
@@ -111,6 +110,8 @@ flowchart LR
 
 ## 🔧 Configuration
 
+The quickest way is to run **`/obsidian-chronicle:setup`** inside Claude Code — it auto-detects your vault and writes this file for you. To edit it by hand:
+
 One JSON file. You can place it at either of two levels — copy [`obsidian-chronicle.example.json`](obsidian-chronicle.example.json) as a starting point:
 
 | Scope | Path | Applies to |
@@ -134,6 +135,23 @@ One JSON file. You can place it at either of two levels — copy [`obsidian-chro
 
 See what resolves: `hooks/resolve-config.sh "$PWD"`. Config is re-read on every fire — no restart needed.
 
+> [!NOTE]
+> **Output language.** Notes are written in **English** by default. Set the `language` config key (e.g. `"language": "Japanese"`) — or pick it during `/obsidian-chronicle:setup` — to fully localize each note: the title (and filename), description, section headings, and callout text are all written in that language. The value is any language name, passed verbatim into the summarization prompt, so anything the model knows works (`"Français"`, `"한국어"`, …). File / function / tool names and code identifiers always stay in English; the note scaffolding is language-agnostic, so switching languages needs no code edits.
+
+## 📊 Comparison
+
+How it compares to other Claude Code journaling tools → **[COMPARISON.md](docs/COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
+
+## 🛡️ Reliability
+
+Built to run for months without writing junk:
+
+- **Recursion guard** — `claude -p` spawns its own session; a flag stops the inner `SessionEnd` from recursing.
+- **Survives quit** — `trap '' HUP` lets the summary finish even if you exit mid-write.
+- **Per-session lock** — `PreCompact` + `/done` + `SessionEnd` can't double-write the same session.
+- **Skips, never guesses** — empty/oversized convo, `claude -p` errors, or no vault → log + exit, no garbage note.
+- **No `eval`** — config is read with `jq -r`; values never execute.
+
 ## 🩺 Troubleshooting
 
 ```bash
@@ -152,20 +170,6 @@ Every fire logs a `start:` line and a result:
 | `skip: in-progress lock held` | another fire for this session is already running |
 | `fail: claude -p exit=N` | check `claude` in PATH / the `model` value / network |
 | `fail: … Prompt is too long` | set `model` to `opus` (1M context), or lower `maxBytes` to skip oversized conversations |
-
-## 🛡️ Reliability
-
-Built to run for months without writing junk:
-
-- **Recursion guard** — `claude -p` spawns its own session; a flag stops the inner `SessionEnd` from recursing.
-- **Survives quit** — `trap '' HUP` lets the summary finish even if you exit mid-write.
-- **Per-session lock** — `PreCompact` + `/done` + `SessionEnd` can't double-write the same session.
-- **Skips, never guesses** — empty/oversized convo, `claude -p` errors, or no vault → log + exit, no garbage note.
-- **No `eval`** — config is read with `jq -r`; values never execute.
-
-## 📊 Comparison
-
-How it compares to other Claude Code journaling tools → **[COMPARISON.md](docs/COMPARISON.md)**. Short version: a few tools write AI summaries into Obsidian too, but chronicle is the hands-off one — a marketplace plugin that's *hook-triggered (nothing to run) and resume-aware*.
 
 ## ❓ FAQ
 
