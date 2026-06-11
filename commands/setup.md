@@ -90,7 +90,12 @@ jq --arg vaultPath "$VAULTPATH" --arg sessionsDir "$SESSIONSDIR" --arg dailyDir 
 
 ## 7. Confirm
 
+Invalidate the SessionStart config cache so the new config is re-resolved on the
+next session start / vault task (the cache is keyed by cwd, but a user-level
+change affects every cwd, so clear the whole cache dir):
+
 ```bash
+rm -rf "${XDG_STATE_HOME:-$HOME/.local/state}/obsidian-chronicle/config-cache"
 echo "✓ wrote $DEST"
 "$PLUGIN/hooks/resolve-config.sh" "$(pwd)"
 ```
@@ -99,7 +104,7 @@ Show the user:
 - `✓ wrote <DEST>`.
 - The resolver's output (the **resolved absolute** `sessionsDir`, `dailyDir`, `log`, and `source`) so they can confirm notes will land where they expect.
 - If `source` is `none`, warn that no vault was resolved — they must set `vaultPath`.
-- Precedence note: project overrides user-level key-by-key; takes effect on the next hook fire (SessionEnd, PreCompact, or `/done`) — no restart needed.
+- Precedence note: project overrides user-level key-by-key; takes effect on the next hook fire (SessionEnd, PreCompact, or `/done`) — no restart needed. The vault paths injected into the main session at SessionStart are a snapshot; they refresh on the next session start (`/clear`, resume, or a new session).
 
 # Rules
 

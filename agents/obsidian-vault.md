@@ -31,11 +31,19 @@ handled correctly instead of being treated as plain text.
 
 **Resolve the vault root at the start of every task — never hardcode it.** The
 vault location is owned by obsidian-chronicle's shared resolver, which honors a
-machine-wide default vault and per-project vaults. Run:
+machine-wide default vault and per-project vaults. The SessionStart hook already
+resolved the config once and cached it to disk (keyed by cwd), so **read the
+cache first** and only fall back to running the resolver if the cache is absent:
 
 ```bash
-PLUGIN="${CLAUDE_PLUGIN_ROOT:-$(jq -r '.extraKnownMarketplaces["obsidian-chronicle"].source.path // empty' "$HOME/.claude/settings.json")}"
-CONFIG="$("$PLUGIN/hooks/resolve-config.sh" "$PWD")"
+STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+CACHE="$STATE_HOME/obsidian-chronicle/config-cache/$(printf '%s' "$PWD" | tr -c 'a-zA-Z0-9' '-').json"
+if [ -f "$CACHE" ]; then
+  CONFIG="$(cat "$CACHE")"
+else
+  PLUGIN="${CLAUDE_PLUGIN_ROOT:-$(jq -r '.extraKnownMarketplaces["obsidian-chronicle"].source.path // empty' "$HOME/.claude/settings.json")}"
+  CONFIG="$("$PLUGIN/hooks/resolve-config.sh" "$PWD")"
+fi
 VAULT="$(printf '%s' "$CONFIG" | jq -r '.vaultPath')"   # absolute, tilde-expanded
 ```
 
