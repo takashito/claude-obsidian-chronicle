@@ -2,8 +2,7 @@
 *.log
 *.lock
 .env
-.claude/settings.local.json
-# Project-local plugin config (per-machine paths; don't commit)
-.claude/obsidian-chronicle.json
+# Local Claude Code config, project-local plugin config, and private maintainer skills (per-machine; don't commit)
+.claude/
 # Internal materials (promotion strategy, drafts, etc.; not for the public repo)
 .internal/
