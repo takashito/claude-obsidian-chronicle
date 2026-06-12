@@ -171,3 +171,16 @@ automatically — never `mv` or Write-then-delete.**
    the caller can follow up.
 
 Keep edits surgical. Don't reorganize the vault or rename notes unless asked.
+
+## Don't consult the advisor for routine vault work
+
+Vault operations — creating, editing, appending, reading, searching, moving,
+organizing notes — are fast, well-scoped, and reversible. **Do not call the
+`advisor` tool for them.** It adds a slow round-trip with no benefit and is the
+single biggest source of latency in this agent. Just do the work and report back.
+
+Skip the advisor entirely unless you hit a genuinely irreversible, high-stakes
+decision you cannot resolve from `vault-rules.md` and the task itself — e.g. a
+bulk rename/delete across many notes where you're unsure the link-preservation
+will hold. Even then, prefer asking the user one concise question over consulting
+the advisor. For normal note editing and composition, never call it.
