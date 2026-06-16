@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "obsidian-chronicle",
   "displayName": "obsidian chronicle",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Auto-records Claude Code sessions as structured Obsidian notes + Daily Note entries (via the SessionEnd/PreCompact hooks and /done), and ships the obsidian-vault agent — the unified handler for all Obsidian vault work (create, edit, search, organize notes, tasks, canvases, bases). Configure with /obsidian-chronicle:setup.",
   "author": {
     "name": "takashito",
