@@ -325,6 +325,7 @@ CRITICAL OUTPUT RULES:
 - DO NOT output lines that begin with `✓`, `>`, or `<command-name>` — these are conversation artifacts, not summary content.
 - Be specific — name actual files, functions, decisions; avoid generic phrasing.
 - Do NOT repeat content from the prior summary; only cover what is new in this segment.
+- Backtick anything literal that Obsidian/Dataview would otherwise parse: `::` (inline field), `<word>` (HTML tag), `$=` and ` ```dataview ` fences (run as queries). Put a blank line before any `===`/`---` separator so it is not read as a setext heading.
 - Total length under 350 words.
 - If nothing substantive happened since the prior summary, respond with EXACTLY the single line `SKIP` and nothing else.
 
@@ -495,6 +496,7 @@ CRITICAL OUTPUT RULES:
 - DO NOT echo or quote messages verbatim from the conversation. Synthesize new prose.
 - DO NOT output lines that begin with `✓`, `>` (outside the callouts shown above), or `<command-name>` — these are conversation artifacts, not summary content.
 - Be specific — name actual files, functions, decisions; avoid generic phrasing.
+- Backtick anything literal that Obsidian/Dataview would otherwise parse: `::` (inline field), `<word>` (HTML tag), `$=` and ` ```dataview ` fences (run as queries). Put a blank line before any `===`/`---` separator so it is not read as a setext heading.
 - Total length under 700 words.
 - If the conversation has no real user work (e.g. it is mostly plugin echoes or an empty session), respond with EXACTLY the single line `SKIP` and nothing else. The pipeline will drop the note rather than write garbage.'
 

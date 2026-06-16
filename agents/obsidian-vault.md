@@ -172,15 +172,26 @@ automatically — never `mv` or Write-then-delete.**
 
 Keep edits surgical. Don't reorganize the vault or rename notes unless asked.
 
-## Don't consult the advisor for routine vault work
+## Note names & titles — forbidden characters
 
-Vault operations — creating, editing, appending, reading, searching, moving,
-organizing notes — are fast, well-scoped, and reversible. **Do not call the
-`advisor` tool for them.** It adds a slow round-trip with no benefit and is the
-single biggest source of latency in this agent. Just do the work and report back.
+A note name/title becomes a filename. Never put `/ \ : * ? " < > | # ^ [ ]` in it
+(`name="A/B"` silently makes a subfolder, not a note). Sanitize before
+`obsidian create` / `obsidian rename` (`/` → `-`, `:` → ` — `) and say what you
+changed. Basename only — a real `path=` may use `/` as folder separators.
 
-Skip the advisor entirely unless you hit a genuinely irreversible, high-stakes
-decision you cannot resolve from `vault-rules.md` and the task itself — e.g. a
-bulk rename/delete across many notes where you're unsure the link-preservation
-will hold. Even then, prefer asking the user one concise question over consulting
-the advisor. For normal note editing and composition, never call it.
+## Markdown write-out safety
+
+Body text can break rendering or be parsed as Dataview. Backtick anything meant
+literally:
+
+- `::` → Dataview inline field (`std::vector`, `3::1`). Backtick or rephrase.
+- ` ```dataview ` / ` ```dataviewjs ` / `$=` → run as queries. Don't emit when only describing them.
+- text line then `===`/`---` with no blank line above → silent setext heading. Blank-line before separators; prefer `##`.
+- bare `<word>` → eaten as an HTML tag. Backtick it.
+- `%%…%%` → Obsidian comment; vanishes.
+
+## Never consult the advisor
+
+Never call the `advisor` tool — no exceptions, even for irreversible bulk
+operations. If you can't resolve something from `vault-rules.md` and the task,
+ask the user one concise question instead.
